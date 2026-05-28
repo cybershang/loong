@@ -4,9 +4,11 @@ use std::io::{self, IsTerminal, Write};
 
 use opentelemetry::trace::{Span, Tracer, TracerProvider};
 use opentelemetry::{KeyValue, global};
-use opentelemetry_otlp::{OTEL_EXPORTER_OTLP_TRACES_ENDPOINT, SpanExporter};
+use opentelemetry_otlp::{OTEL_EXPORTER_OTLP_TRACES_ENDPOINT, SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::Resource;
+use opentelemetry_sdk::runtime;
 use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::trace::span_processor_with_async_runtime::BatchSpanProcessor;
 use serde_json::{Map, Value};
 use tracing::field::{Field, Visit};
 use tracing::{Event, Subscriber};
@@ -382,12 +384,55 @@ pub fn init_otel() -> OtelGuard {
 
     let service_name = std::env::var("OTEL_SERVICE_NAME").unwrap_or_else(|_| "loong".to_owned());
 
-    let exporter = match SpanExporter::builder().with_http().build() {
-        Ok(e) => e,
-        Err(e) => {
-            let mut stderr = io::stderr();
-            let _ = writeln!(stderr, "loong.daemon otel exporter init failed: {e}");
-            return OtelGuard { provider: None };
+    let exporter = {
+        let mut client_builder = reqwest::Client::builder();
+
+        if let Ok(ca_path) = std::env::var("OTEL_CA_CERT_FILE") {
+            let pem = match std::fs::read(&ca_path) {
+                Ok(pem) => pem,
+                Err(e) => {
+                    let mut stderr = io::stderr();
+                    let _ = writeln!(
+                        stderr,
+                        "loong.daemon otel CA cert read failed ({ca_path}): {e}"
+                    );
+                    return OtelGuard { provider: None };
+                }
+            };
+            let ca = match reqwest::Certificate::from_pem(&pem) {
+                Ok(ca) => ca,
+                Err(e) => {
+                    let mut stderr = io::stderr();
+                    let _ = writeln!(
+                        stderr,
+                        "loong.daemon otel CA cert parse failed ({ca_path}): {e}"
+                    );
+                    return OtelGuard { provider: None };
+                }
+            };
+            client_builder = client_builder.add_root_certificate(ca);
+        }
+
+        let client = match client_builder.build() {
+            Ok(client) => client,
+            Err(e) => {
+                let mut stderr = io::stderr();
+                let _ = writeln!(stderr, "loong.daemon otel reqwest client build failed: {e}");
+                return OtelGuard { provider: None };
+            }
+        };
+
+        match SpanExporter::builder()
+            .with_http()
+            .with_http_client(client)
+            .build()
+        {
+            Ok(e) => e,
+            Err(e) => {
+                let mut stderr = io::stderr();
+                let _ = writeln!(stderr, "loong.daemon otel exporter init failed: {e}");
+                return OtelGuard { provider: None };
+            }
         }
     };
 
@@ -396,7 +441,7 @@ pub fn init_otel() -> OtelGuard {
         .build();
 
     let provider = SdkTracerProvider::builder()
-        .with_batch_exporter(exporter)
+        .with_span_processor(BatchSpanProcessor::builder(exporter, runtime::Tokio).build())
         .with_resource(resource)
         .build();
 

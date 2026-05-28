@@ -169,7 +169,6 @@ fn check_legacy_home_migration() {
 fn main() {
     let _stdin_guard = StdinGuard;
     init_tracing();
-    let mut _otel_guard = init_otel();
     mvp::config::set_active_cli_command_name(mvp::config::detect_invoked_cli_command_name());
     loong_daemon::make_env_compatible();
     check_legacy_home_migration();
@@ -189,8 +188,12 @@ fn main() {
         command = %redacted_command,
         "resolved CLI command"
     );
-    let result = build_daemon_runtime(&command)
-        .and_then(|runtime| runtime.block_on(run_command(command, invoked_as_default_entry)));
+    let result = build_daemon_runtime(&command).and_then(|runtime| {
+        runtime.block_on(async {
+            let _otel_guard = init_otel();
+            run_command(command, invoked_as_default_entry).await
+        })
+    });
     if let Err(error) = result {
         let error_code = error_code(error.as_str());
         tracing::error!(
@@ -203,7 +206,6 @@ fn main() {
         {
             eprintln!("error: {error}");
         }
-        _otel_guard.shutdown();
         flush_stdin();
         std::process::exit(2);
     }
