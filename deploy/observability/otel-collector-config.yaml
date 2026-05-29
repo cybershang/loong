@@ -3,6 +3,9 @@ receivers:
     protocols:
       http:
         endpoint: 0.0.0.0:4318
+        tls:
+          cert_file: /etc/certs/server.crt
+          key_file: /etc/certs/server.key
       grpc:
         endpoint: 0.0.0.0:4317
 
