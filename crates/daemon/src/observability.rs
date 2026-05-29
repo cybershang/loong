@@ -377,6 +377,58 @@ fn endpoint_env_is_present(value: Option<&str>) -> bool {
     value.is_some_and(|entry| !entry.trim().is_empty())
 }
 
+fn build_otel_exporter() -> Option<SpanExporter> {
+    let mut client_builder = reqwest::Client::builder();
+
+    if let Ok(ca_path) = std::env::var("OTEL_CA_CERT_FILE") {
+        let pem = match std::fs::read(&ca_path) {
+            Ok(pem) => pem,
+            Err(e) => {
+                let mut stderr = io::stderr();
+                let _ = writeln!(
+                    stderr,
+                    "loong.daemon otel CA cert read failed ({ca_path}): {e}"
+                );
+                return None;
+            }
+        };
+        let ca = match reqwest::Certificate::from_pem(&pem) {
+            Ok(ca) => ca,
+            Err(e) => {
+                let mut stderr = io::stderr();
+                let _ = writeln!(
+                    stderr,
+                    "loong.daemon otel CA cert parse failed ({ca_path}): {e}"
+                );
+                return None;
+            }
+        };
+        client_builder = client_builder.add_root_certificate(ca);
+    }
+
+    let client = match client_builder.build() {
+        Ok(client) => client,
+        Err(e) => {
+            let mut stderr = io::stderr();
+            let _ = writeln!(stderr, "loong.daemon otel reqwest client build failed: {e}");
+            return None;
+        }
+    };
+
+    match SpanExporter::builder()
+        .with_http()
+        .with_http_client(client)
+        .build()
+    {
+        Ok(exporter) => Some(exporter),
+        Err(e) => {
+            let mut stderr = io::stderr();
+            let _ = writeln!(stderr, "loong.daemon otel exporter init failed: {e}");
+            None
+        }
+    }
+}
+
 pub fn init_otel() -> OtelGuard {
     if !otel_traces_export_is_enabled() {
         return OtelGuard { provider: None };
@@ -384,56 +436,8 @@ pub fn init_otel() -> OtelGuard {
 
     let service_name = std::env::var("OTEL_SERVICE_NAME").unwrap_or_else(|_| "loong".to_owned());
 
-    let exporter = {
-        let mut client_builder = reqwest::Client::builder();
-
-        if let Ok(ca_path) = std::env::var("OTEL_CA_CERT_FILE") {
-            let pem = match std::fs::read(&ca_path) {
-                Ok(pem) => pem,
-                Err(e) => {
-                    let mut stderr = io::stderr();
-                    let _ = writeln!(
-                        stderr,
-                        "loong.daemon otel CA cert read failed ({ca_path}): {e}"
-                    );
-                    return OtelGuard { provider: None };
-                }
-            };
-            let ca = match reqwest::Certificate::from_pem(&pem) {
-                Ok(ca) => ca,
-                Err(e) => {
-                    let mut stderr = io::stderr();
-                    let _ = writeln!(
-                        stderr,
-                        "loong.daemon otel CA cert parse failed ({ca_path}): {e}"
-                    );
-                    return OtelGuard { provider: None };
-                }
-            };
-            client_builder = client_builder.add_root_certificate(ca);
-        }
-
-        let client = match client_builder.build() {
-            Ok(client) => client,
-            Err(e) => {
-                let mut stderr = io::stderr();
-                let _ = writeln!(stderr, "loong.daemon otel reqwest client build failed: {e}");
-                return OtelGuard { provider: None };
-            }
-        };
-
-        match SpanExporter::builder()
-            .with_http()
-            .with_http_client(client)
-            .build()
-        {
-            Ok(e) => e,
-            Err(e) => {
-                let mut stderr = io::stderr();
-                let _ = writeln!(stderr, "loong.daemon otel exporter init failed: {e}");
-                return OtelGuard { provider: None };
-            }
-        }
+    let Some(exporter) = build_otel_exporter() else {
+        return OtelGuard { provider: None };
     };
 
     let resource = Resource::builder()
