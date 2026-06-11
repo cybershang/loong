@@ -36,14 +36,11 @@ pub mod workspace_guidance;
 mod process_env;
 #[doc(hidden)]
 pub mod process_launch;
+
+#[allow(clippy::expect_used)]
 #[doc(hidden)]
 pub mod test_support;
-#[allow(
-    clippy::expect_used,
-    clippy::panic,
-    clippy::unwrap_used,
-    clippy::missing_panics_doc
-)]
+#[allow(clippy::panic, clippy::unwrap_used, clippy::missing_panics_doc)]
 #[doc(hidden)]
 #[cfg(test)]
 pub mod test_utils;
