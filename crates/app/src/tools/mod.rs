@@ -29,9 +29,6 @@ use routing::{
 
 pub(crate) mod approval;
 mod bash;
-mod bash_ast;
-mod bash_governance;
-mod bash_rules;
 #[cfg(feature = "tool-browser")]
 mod browser;
 mod bundled_skills;
@@ -452,5 +449,7 @@ fn feishu_searchable_entries() -> Vec<SearchableToolEntry> {
 }
 
 #[cfg(test)]
-#[path = "tools_mod_tests.rs"]
+pub(self) mod test_utils;
+
+#[cfg(test)]
 mod tests;

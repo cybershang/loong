@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 use loong_contracts::{ExecutionSecurityTier, SecretRef};
 use serde::{Deserialize, Serialize};
 
-use super::{bash_rules, shell_policy_ext::ShellPolicyDefault};
+use super::{bash, shell_policy_ext::ShellPolicyDefault};
 use crate::config::{AutonomyProfile, LoongConfig};
 #[cfg(feature = "feishu-integration")]
 use crate::config::{FeishuChannelConfig, FeishuIntegrationConfig};
@@ -87,7 +87,7 @@ impl BrowserRuntimePolicy {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct BashGovernanceRuntimePolicy {
     pub rules_dir: PathBuf,
-    pub rules: Vec<bash_rules::CompiledPrefixRule>,
+    pub rules: Vec<bash::rules::CompiledPrefixRule>,
     pub load_error: Option<String>,
 }
 
@@ -135,9 +135,9 @@ fn emit_bash_runtime_warning_once(warning: &str) {
 
 fn translate_legacy_shell_rules<'a>(
     source: &str,
-    decision: bash_rules::PrefixRuleDecision,
+    decision: bash::rules::PrefixRuleDecision,
     commands: impl IntoIterator<Item = &'a String>,
-) -> Vec<bash_rules::CompiledPrefixRule> {
+) -> Vec<bash::rules::CompiledPrefixRule> {
     commands
         .into_iter()
         .filter_map(|command| {
@@ -146,11 +146,11 @@ fn translate_legacy_shell_rules<'a>(
                 return None;
             }
 
-            Some(bash_rules::CompiledPrefixRule {
+            Some(bash::rules::CompiledPrefixRule {
                 source: format!("{source}:{normalized}"),
                 prefix: vec![normalized],
                 decision,
-                origin: bash_rules::CompiledRuleOrigin::LegacyShellCompatibility,
+                origin: bash::rules::CompiledRuleOrigin::LegacyShellCompatibility,
             })
         })
         .collect()
@@ -163,16 +163,16 @@ fn build_bash_governance_runtime_policy<'a>(
 ) -> BashGovernanceRuntimePolicy {
     let mut rules = translate_legacy_shell_rules(
         "shell_allow",
-        bash_rules::PrefixRuleDecision::Allow,
+        bash::rules::PrefixRuleDecision::Allow,
         shell_allow,
     );
     rules.extend(translate_legacy_shell_rules(
         "shell_deny",
-        bash_rules::PrefixRuleDecision::Deny,
+        bash::rules::PrefixRuleDecision::Deny,
         shell_deny,
     ));
 
-    let load_error = match bash_rules::load_rules_from_dir(&rules_dir) {
+    let load_error = match bash::rules::load_rules_from_dir(&rules_dir) {
         Ok(loaded_rules) => {
             rules.extend(loaded_rules);
             None

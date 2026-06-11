@@ -124,7 +124,7 @@ fn shell_exec_empty_path_probe() {
         return;
     }
 
-    let root = unique_tool_temp_dir("loong-shell-empty-path-fallback");
+    let root = unique_temp_dir("loong-shell-empty-path-fallback");
     std::fs::create_dir_all(&root).expect("create root");
 
     let mut env = ScopedEnv::new();
@@ -155,8 +155,8 @@ fn shell_exec_empty_path_probe() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn shell_exec_rejects_cwd_outside_file_root() {
-    let root = unique_tool_temp_dir("loong-shell-cwd-root");
-    let outside_root = unique_tool_temp_dir("loong-shell-cwd-outside");
+    let root = unique_temp_dir("loong-shell-cwd-root");
+    let outside_root = unique_temp_dir("loong-shell-cwd-outside");
     std::fs::create_dir_all(&root).expect("create root");
     std::fs::create_dir_all(&outside_root).expect("create outside root");
 
@@ -186,7 +186,7 @@ fn shell_exec_rejects_cwd_outside_file_root() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn shell_exec_rejects_cwd_that_is_not_directory() {
-    let root = unique_tool_temp_dir("loong-shell-cwd-file");
+    let root = unique_temp_dir("loong-shell-cwd-file");
     std::fs::create_dir_all(&root).expect("create root");
     let file_path = root.join("note.txt");
     std::fs::write(&file_path, "hello").expect("write file");
@@ -217,8 +217,8 @@ fn shell_exec_rejects_cwd_that_is_not_directory() {
 fn shell_exec_rejects_cwd_symlink_outside_file_root() {
     use std::os::unix::fs::symlink;
 
-    let root = unique_tool_temp_dir("loong-shell-cwd-symlink-root");
-    let outside_root = unique_tool_temp_dir("loong-shell-cwd-symlink-outside");
+    let root = unique_temp_dir("loong-shell-cwd-symlink-root");
+    let outside_root = unique_temp_dir("loong-shell-cwd-symlink-outside");
     std::fs::create_dir_all(&root).expect("create root");
     std::fs::create_dir_all(&outside_root).expect("create outside root");
 
@@ -250,7 +250,7 @@ fn shell_exec_rejects_cwd_symlink_outside_file_root() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn shell_exec_rejects_missing_cwd_directory() {
-    let root = unique_tool_temp_dir("loong-shell-cwd-missing");
+    let root = unique_temp_dir("loong-shell-cwd-missing");
     std::fs::create_dir_all(&root).expect("create root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -514,7 +514,7 @@ fn shell_exec_rejects_non_lowercase_command_names_before_execution() {
     use std::fs;
     use std::os::unix::fs::PermissionsExt;
 
-    let root = unique_tool_temp_dir("loong-shell-mixed-case");
+    let root = unique_temp_dir("loong-shell-mixed-case");
     fs::create_dir_all(&root).expect("create fixture root");
 
     let script = root.join("MiXeDCmd");
@@ -683,10 +683,8 @@ fn shell_exec_truncates_large_stdout_without_failing_command() {
         return;
     }
 
-    let root = std::env::temp_dir().join(format!(
-        "loong-shell-large-output-{}",
-        std::process::id()
-    ));
+    let root =
+        std::env::temp_dir().join(format!("loong-shell-large-output-{}", std::process::id()));
     std::fs::create_dir_all(&root).expect("create large output root");
     let mut config = test_tool_runtime_config(root.clone());
     config.shell_allow.insert("perl".to_owned());
@@ -807,10 +805,8 @@ fn shell_exec_failed_large_stderr_prefers_stderr_handoff_recipe() {
         return;
     }
 
-    let root = std::env::temp_dir().join(format!(
-        "loong-shell-large-stderr-{}",
-        std::process::id()
-    ));
+    let root =
+        std::env::temp_dir().join(format!("loong-shell-large-stderr-{}", std::process::id()));
     std::fs::create_dir_all(&root).expect("create large stderr root");
     let mut config = test_tool_runtime_config(root.clone());
     config.shell_allow.insert("perl".to_owned());
@@ -888,7 +884,7 @@ fn tool_search_result_includes_compact_argument_hints() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn tool_search_exact_tool_id_refresh_returns_one_current_card_with_lease() {
-    let root = unique_tool_temp_dir("loong-tool-search-exact-refresh");
+    let root = unique_temp_dir("loong-tool-search-exact-refresh");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -923,7 +919,7 @@ fn tool_search_exact_tool_id_refresh_returns_one_current_card_with_lease() {
 #[test]
 fn tool_search_exact_tool_id_not_visible_preserves_raw_request_and_diagnostics_with_fallback_results()
  {
-    let root = unique_tool_temp_dir("loong-tool-search-exact-refresh-fallback");
+    let root = unique_temp_dir("loong-tool-search-exact-refresh-fallback");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());

@@ -1,9 +1,9 @@
-use super::bash_ast::{
+use super::super::shell_policy_ext::ShellPolicyDefault;
+use super::ast::{
     BashCommandAnalysis, MinimalCommandUnit, UnitClassification, UnitOperator,
     UnsupportedStructureKind, analyze_bash_command,
 };
-use super::bash_rules::{CompiledPrefixRule, CompiledRuleOrigin, PrefixRuleDecision};
-use super::shell_policy_ext::ShellPolicyDefault;
+use super::rules::{CompiledPrefixRule, CompiledRuleOrigin, PrefixRuleDecision};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum UnitDecisionSource {
@@ -347,7 +347,7 @@ fn default_mode_label(default_mode: ShellPolicyDefault) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use super::super::bash_rules::CompiledRuleOrigin;
+    use super::super::rules::CompiledRuleOrigin;
     use super::*;
 
     struct PrefixRuleFixture;

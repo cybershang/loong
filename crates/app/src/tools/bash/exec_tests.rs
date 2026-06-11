@@ -1,5 +1,7 @@
+use super::super::*;
 use super::*;
-use crate::test_support::ScopedCurrentDir;
+use crate::tools::test_utils::*;
+use serde_json::json;
 
 fn execute_tool_core_for_subprocess_test(
     request: ToolCoreRequest,
@@ -22,11 +24,11 @@ fn execute_tool_core_with_trusted_subprocess_test_context(
 #[cfg(feature = "tool-shell")]
 #[test]
 fn runtime_tool_view_hides_bash_exec_when_runtime_is_unavailable() {
-    let root = unique_tool_temp_dir("loong-bash-tool-view-hidden");
+    let root = crate::test_support::unique_temp_dir("loong-bash-tool-view-hidden");
     std::fs::create_dir_all(&root).expect("create root dir");
 
     let config = test_tool_runtime_config(root);
-    let tool_view = runtime_tool_view_for_runtime_config(&config);
+    let tool_view = super::super::runtime_tool_view_for_runtime_config(&config);
 
     assert!(!tool_view.contains("bash.exec"));
 }
@@ -98,7 +100,9 @@ fn tool_search_hides_bash_exec_when_governance_rules_failed_to_load() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_routes_bash_capabilities_to_exec_when_runtime_is_available() {
-    let root = unique_tool_temp_dir("loong-bash-tool-search-visible");
+    use crate::{test_support::unique_temp_dir, tools::execute_tool_core_with_config};
+
+    let root = unique_temp_dir("loong-bash-tool-search-visible");
     std::fs::create_dir_all(&root).expect("create root dir");
 
     let mut config = test_tool_runtime_config(root);
@@ -154,7 +158,9 @@ fn tool_search_exact_bash_query_surfaces_bash() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn bash_exec_catalog_exposes_command_cwd_and_timeout_ms() {
-    let catalog = tool_catalog();
+    use crate::tools::catalog;
+
+    let catalog = tools_catalog();
     let descriptor = catalog
         .descriptor("bash.exec")
         .expect("bash.exec should be in the catalog");
@@ -364,7 +370,7 @@ fn bash_exec_falls_back_to_file_root_when_current_dir_is_unavailable() {
         ..runtime_config::BashExecRuntimePolicy::default()
     };
 
-    let cwd_guard = ScopedCurrentDir::new(&deleted_cwd);
+    let cwd_guard = crate::test_support::ScopedCurrentDir::new(&deleted_cwd);
     fs::remove_dir_all(&deleted_cwd).expect("remove deleted cwd");
 
     let outcome = execute_tool_core_for_subprocess_test(
@@ -543,7 +549,7 @@ fn bash_exec_uses_loong_home_rules_dir_even_when_runtime_is_built_without_config
     )
     .expect("rule file");
     fs::create_dir_all(&workspace).expect("workspace");
-    let _cwd = ScopedCurrentDir::new(&workspace);
+    let _cwd = crate::test_support::ScopedCurrentDir::new(&workspace);
 
     let mut runtime = runtime_config::ToolRuntimeConfig::from_loong_config(
         &crate::config::LoongConfig::default(),

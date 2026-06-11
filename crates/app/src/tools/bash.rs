@@ -1,3 +1,10 @@
+pub mod ast;
+pub mod governance;
+pub mod rules;
+
+#[cfg(test)]
+mod exec_tests;
+
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::thread;
@@ -10,12 +17,12 @@ use loong_contracts::{ToolCoreOutcome, ToolCoreRequest};
 use serde_json::Value;
 
 #[cfg(feature = "tool-shell")]
-use super::bash_governance::{FinalGovernanceDecision, evaluate_bash_command};
-#[cfg(feature = "tool-shell")]
 use super::process_exec;
 use super::runtime_config::BashExecRuntimePolicy;
 #[cfg(feature = "tool-shell")]
 use super::runtime_events::current_tool_runtime_event_sink;
+#[cfg(feature = "tool-shell")]
+use governance::{FinalGovernanceDecision, evaluate_bash_command};
 
 const BASH_UNAVAILABLE_WARNING: &str =
     "bash unavailable; hiding bash.exec from runtime tool surface";
@@ -245,7 +252,7 @@ fn probe_bash_candidate_with_timeout(candidate: &Path, timeout: Duration) -> boo
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tools::bash_rules::{PrefixRuleDecision, compile_compatibility_rules};
+    use crate::tools::bash::rules::{PrefixRuleDecision, compile_compatibility_rules};
     use crate::tools::runtime_config::ToolRuntimeConfig;
     use crate::tools::runtime_events::{
         ToolRuntimeEvent, ToolRuntimeEventSink, ToolRuntimeStream, with_tool_runtime_event_sink,

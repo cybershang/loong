@@ -1,115 +1,11 @@
+use super::test_utils::*;
 use super::*;
 use crate::config::ToolConfig;
-use crate::test_support::{ScopedEnv, ScopedLoongHome, unique_temp_dir};
+use crate::test_support::unique_temp_dir;
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use loong_contracts::Capability;
 use std::collections::{BTreeMap, BTreeSet};
-use std::ops::{Deref, DerefMut};
-use std::path::{Path, PathBuf};
-
-struct ToolTestRuntimeConfig {
-    config: runtime_config::ToolRuntimeConfig,
-    _runtime_home: ScopedLoongHome,
-}
-
-impl Deref for ToolTestRuntimeConfig {
-    type Target = runtime_config::ToolRuntimeConfig;
-
-    fn deref(&self) -> &Self::Target {
-        &self.config
-    }
-}
-
-impl DerefMut for ToolTestRuntimeConfig {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.config
-    }
-}
-
-impl ToolTestRuntimeConfig {
-    fn into_inner(self) -> runtime_config::ToolRuntimeConfig {
-        self.config
-    }
-}
-
-fn test_tool_runtime_config(root: impl AsRef<Path>) -> ToolTestRuntimeConfig {
-    let runtime_home = ScopedLoongHome::new("loong-tool-runtime-home");
-    let config = runtime_config::ToolRuntimeConfig {
-        shell_allow: BTreeSet::from(["echo".to_owned(), "cat".to_owned(), "ls".to_owned()]),
-        file_root: Some(root.as_ref().to_path_buf()),
-        messages_enabled: true,
-        skills: runtime_config::SkillsRuntimePolicy {
-            enabled: true,
-            require_download_approval: true,
-            allowed_domains: BTreeSet::new(),
-            blocked_domains: BTreeSet::new(),
-            install_root: None,
-            auto_expose_installed: false,
-        },
-        ..Default::default()
-    };
-    ToolTestRuntimeConfig {
-        config,
-        _runtime_home: runtime_home,
-    }
-}
-
-fn ready_bash_exec_runtime_policy() -> runtime_config::BashExecRuntimePolicy {
-    let resolved_bash = which::which("bash").unwrap_or_else(|_| PathBuf::from("/bin/bash"));
-    runtime_config::BashExecRuntimePolicy {
-        available: true,
-        command: Some(resolved_bash),
-        ..runtime_config::BashExecRuntimePolicy::default()
-    }
-}
-
-#[cfg(all(feature = "tool-shell", unix))]
-fn configured_test_bash_runtime_with_rules(
-    root: &Path,
-) -> (runtime_config::BashExecRuntimePolicy, PathBuf) {
-    let log_path = root.join("bash-args.log");
-    let runtime_path = write_fake_bash_runtime(root, "fake-bash", &log_path);
-    let rules_dir = root.join(crate::config::HOME_DIR_NAME).join("rules");
-    let rules = bash_rules::load_rules_from_dir(&rules_dir).expect("load rules");
-
-    (
-        runtime_config::BashExecRuntimePolicy {
-            available: true,
-            command: Some(runtime_path),
-            governance: runtime_config::BashGovernanceRuntimePolicy {
-                rules_dir,
-                rules,
-                load_error: None,
-            },
-            ..runtime_config::BashExecRuntimePolicy::default()
-        },
-        log_path,
-    )
-}
-
-#[cfg(all(feature = "tool-shell", unix))]
-fn write_fake_bash_runtime(root: &Path, name: &str, log_path: &Path) -> PathBuf {
-    let path = root.join(name);
-    let script = format!(
-        "#!/bin/sh\nLOG_PATH=\"{}\"\n: > \"$LOG_PATH\"\nfor arg in \"$@\"; do\n  printf '%s\\n' \"$arg\" >> \"$LOG_PATH\"\ndone\nMODE=\"${{1:-}}\"\nCOMMAND=\"${{2:-}}\"\ncase \"$MODE\" in\n  -c|-lc)\n    exec /bin/sh -c \"$COMMAND\"\n    ;;\n  *)\n    printf 'unexpected bash args: %s' \"$*\" >&2\n    exit 97\n    ;;\nesac\n",
-        log_path.display()
-    );
-    crate::test_support::write_executable_script_atomically(&path, &script)
-        .expect("write fake bash runtime");
-    path
-}
-
-fn execute_tool_core_with_test_context(
-    request: ToolCoreRequest,
-    config: &runtime_config::ToolRuntimeConfig,
-) -> Result<ToolCoreOutcome, String> {
-    if payload_uses_reserved_internal_tool_context(&request.payload) {
-        with_trusted_internal_tool_payload(|| super::execute_tool_core_with_config(request, config))
-    } else {
-        super::execute_tool_core_with_config(request, config)
-    }
-}
 
 #[test]
 fn normalize_without_fs_preserves_relative_parent_segments() {
@@ -167,12 +63,6 @@ fn expected_tool_request_error_leaves_runtime_failures_as_warnable() {
         "network_error: remote tool execution failed"
     ));
 }
-
-fn unique_tool_temp_dir(prefix: &str) -> PathBuf {
-    unique_temp_dir(prefix)
-}
-
-mod bash_exec_tests;
 
 #[cfg(windows)]
 fn write_agent_browser_cli_script(root: &Path, log_path: &Path) -> PathBuf {
@@ -1119,7 +1009,7 @@ fn tool_id_visible_in_view_supports_direct_aliases_and_grouped_surfaces() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn runtime_tool_view_hides_memory_tools_when_memory_corpus_is_empty() {
-    let root = unique_tool_temp_dir("loongclaw-memory-tool-view-empty");
+    let root = unique_temp_dir("loongclaw-memory-tool-view-empty");
 
     std::fs::create_dir_all(&root).expect("create root dir");
 
@@ -1133,7 +1023,7 @@ fn runtime_tool_view_hides_memory_tools_when_memory_corpus_is_empty() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn runtime_tool_view_includes_memory_tools_when_memory_corpus_exists() {
-    let root = unique_tool_temp_dir("loongclaw-memory-tool-view-visible");
+    let root = unique_temp_dir("loongclaw-memory-tool-view-visible");
     let memory_path = root.join("MEMORY.md");
 
     std::fs::create_dir_all(&root).expect("create root dir");
@@ -1200,7 +1090,7 @@ fn tool_search_returns_direct_results_for_common_file_queries() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn tool_search_surfaces_memory_tools_when_memory_corpus_is_available() {
-    let root = unique_tool_temp_dir("loongclaw-memory-tool-search");
+    let root = unique_temp_dir("loongclaw-memory-tool-search");
     let memory_dir = root.join("memory");
 
     std::fs::create_dir_all(&memory_dir).expect("create memory dir");
@@ -1233,7 +1123,7 @@ fn tool_search_surfaces_memory_tools_when_memory_corpus_is_available() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn tool_search_hides_memory_tools_when_memory_corpus_is_empty() {
-    let root = unique_tool_temp_dir("loongclaw-memory-tool-search-empty");
+    let root = unique_temp_dir("loongclaw-memory-tool-search-empty");
 
     std::fs::create_dir_all(&root).expect("create root dir");
 
@@ -1263,7 +1153,7 @@ fn tool_search_hides_memory_tools_when_memory_corpus_is_empty() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_search_tool_returns_structured_hits_from_workspace_memory_files() {
-    let root = unique_tool_temp_dir("loongclaw-memory-search");
+    let root = unique_temp_dir("loongclaw-memory-search");
     let memory_dir = root.join("memory");
 
     std::fs::create_dir_all(&memory_dir).expect("create memory dir");
@@ -1349,7 +1239,7 @@ fn memory_search_tool_returns_structured_hits_from_workspace_memory_files() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_retrieve_tool_returns_operator_visible_retrieval_truth() {
-    let root = unique_tool_temp_dir("loongclaw-memory-retrieve");
+    let root = unique_temp_dir("loongclaw-memory-retrieve");
     let memory_dir = root.join("memory");
 
     std::fs::create_dir_all(&memory_dir).expect("create memory dir");
@@ -1414,7 +1304,7 @@ fn memory_retrieve_tool_returns_operator_visible_retrieval_truth() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_retrieve_tool_without_query_returns_prompt_style_advisory_recall() {
-    let root = unique_tool_temp_dir("loongclaw-memory-retrieve-prompt");
+    let root = unique_temp_dir("loongclaw-memory-retrieve-prompt");
     std::fs::create_dir_all(&root).expect("create root dir");
     std::fs::write(
         root.join("MEMORY.md"),
@@ -1460,7 +1350,7 @@ fn memory_retrieve_tool_without_query_returns_prompt_style_advisory_recall() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_get_tool_returns_bounded_line_window_from_memory_file() {
-    let root = unique_tool_temp_dir("loongclaw-memory-get");
+    let root = unique_temp_dir("loongclaw-memory-get");
     let memory_path = root.join("MEMORY.md");
 
     std::fs::create_dir_all(&root).expect("create root dir");
@@ -1505,7 +1395,7 @@ fn memory_get_tool_returns_bounded_line_window_from_memory_file() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_get_tool_uses_selected_memory_system_id_in_provenance() {
-    let root = unique_tool_temp_dir("loongclaw-memory-get-selected-system");
+    let root = unique_temp_dir("loongclaw-memory-get-selected-system");
     let memory_path = root.join("MEMORY.md");
 
     std::fs::create_dir_all(&root).expect("create root dir");
@@ -1536,7 +1426,7 @@ fn memory_get_tool_uses_selected_memory_system_id_in_provenance() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_get_tool_reads_requested_window_without_loading_invalid_tail() {
-    let root = unique_tool_temp_dir("loongclaw-memory-get-invalid-tail");
+    let root = unique_temp_dir("loongclaw-memory-get-invalid-tail");
     let memory_path = root.join("MEMORY.md");
     let mut bytes = b"line one\nline two\n".to_vec();
 
@@ -1569,7 +1459,7 @@ fn memory_get_tool_reads_requested_window_without_loading_invalid_tail() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_search_tool_rejects_invalid_max_results_values() {
-    let root = unique_tool_temp_dir("loongclaw-memory-search-invalid-max-results");
+    let root = unique_temp_dir("loongclaw-memory-search-invalid-max-results");
 
     std::fs::create_dir_all(&root).expect("create root dir");
     std::fs::write(root.join("MEMORY.md"), "deploy freeze window\n").expect("write memory");
@@ -1605,7 +1495,7 @@ fn memory_search_tool_rejects_invalid_max_results_values() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_get_tool_rejects_invalid_window_arguments() {
-    let root = unique_tool_temp_dir("loongclaw-memory-get-invalid-window");
+    let root = unique_temp_dir("loongclaw-memory-get-invalid-window");
 
     std::fs::create_dir_all(&root).expect("create root dir");
     std::fs::write(root.join("MEMORY.md"), "line one\nline two\n").expect("write memory");
@@ -1641,7 +1531,7 @@ fn memory_get_tool_rejects_invalid_window_arguments() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn memory_get_tool_hides_non_corpus_file_existence() {
-    let root = unique_tool_temp_dir("loongclaw-memory-get-corpus-boundary");
+    let root = unique_temp_dir("loongclaw-memory-get-corpus-boundary");
 
     std::fs::create_dir_all(&root).expect("create root dir");
     std::fs::write(root.join("MEMORY.md"), "line one\nline two\n").expect("write memory");
@@ -1680,7 +1570,7 @@ mod search_and_shell;
 #[cfg(all(feature = "tool-file", feature = "tool-shell"))]
 #[test]
 fn tool_search_result_includes_search_hint_and_schema_preview() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-card-metadata");
+    let root = unique_temp_dir("loongclaw-tool-search-card-metadata");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -1711,7 +1601,7 @@ fn tool_search_result_includes_search_hint_and_schema_preview() {
 #[cfg(all(feature = "tool-file", feature = "tool-shell"))]
 #[test]
 fn tool_search_accepts_keywords_array_payloads() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-keywords-array");
+    let root = unique_temp_dir("loongclaw-tool-search-keywords-array");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -1739,7 +1629,7 @@ fn tool_search_accepts_keywords_array_payloads() {
 #[cfg(all(feature = "tool-file", feature = "tool-webfetch"))]
 #[test]
 fn tool_search_uses_schema_derived_terms_for_web_fetch_modes() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-schema-derived");
+    let root = unique_temp_dir("loongclaw-tool-search-schema-derived");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -1767,7 +1657,7 @@ fn tool_search_uses_schema_derived_terms_for_web_fetch_modes() {
 #[cfg(all(feature = "tool-file", feature = "tool-websearch"))]
 #[test]
 fn tool_search_matches_prompt_style_queries_across_tool_surfaces() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-surface-prompts");
+    let root = unique_temp_dir("loongclaw-tool-search-surface-prompts");
     let memory_dir = root.join("memory");
 
     std::fs::create_dir_all(&memory_dir).expect("create memory dir");
@@ -1821,7 +1711,7 @@ fn tool_search_matches_prompt_style_queries_across_tool_surfaces() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn tool_search_uses_coarse_listing_fallback_when_query_is_missing() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-missing-query");
+    let root = unique_temp_dir("loongclaw-tool-search-missing-query");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -1859,7 +1749,7 @@ fn tool_search_uses_coarse_listing_fallback_when_query_is_missing() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn direct_write_rejects_exact_edit_blocks() {
-    let root = unique_tool_temp_dir("loongclaw-direct-write-edit-blocks");
+    let root = unique_temp_dir("loongclaw-direct-write-edit-blocks");
     std::fs::create_dir_all(&root).expect("create fixture root");
     let target = root.join("notes.txt");
     std::fs::write(&target, "alpha\nbeta\ngamma\n").expect("seed target file");
@@ -1893,7 +1783,7 @@ fn direct_write_rejects_exact_edit_blocks() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn tool_search_prefers_direct_write_for_write_queries() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-write-query");
+    let root = unique_temp_dir("loongclaw-tool-search-write-query");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -1922,7 +1812,7 @@ fn tool_search_prefers_direct_write_for_write_queries() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn tool_search_accepts_keywords_array_queries() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-keywords-query");
+    let root = unique_temp_dir("loongclaw-tool-search-keywords-query");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -1960,7 +1850,7 @@ fn capability_snapshot_summarizes_hidden_tags_without_tool_names() {
 #[cfg(all(feature = "tool-file", feature = "tool-shell"))]
 #[test]
 fn runtime_discoverable_tool_surface_summary_only_reports_direct_surfaces() {
-    let root = unique_tool_temp_dir("loong-tool-surface-summary");
+    let root = unique_temp_dir("loong-tool-surface-summary");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -2235,7 +2125,7 @@ fn direct_browse_routes_bounded_page_actions() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn tool_search_returns_coarse_fallback_for_zero_match_queries() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-coarse-fallback");
+    let root = unique_temp_dir("loongclaw-tool-search-coarse-fallback");
     std::fs::create_dir_all(&root).expect("create fixture root");
 
     let config = test_tool_runtime_config(root.clone());
@@ -2627,7 +2517,7 @@ fn tool_invoke_dispatches_feishu_discovered_tool_with_a_valid_lease() {
 #[cfg(feature = "tool-file")]
 #[test]
 fn discovered_tool_lease_uses_current_catalog_digest() {
-    let root = unique_tool_temp_dir("loongclaw-tool-lease-digest");
+    let root = unique_temp_dir("loongclaw-tool-lease-digest");
     let config = test_tool_runtime_config(root.clone());
     let search = execute_tool_core_with_config(
         ToolCoreRequest {
@@ -3264,13 +3154,13 @@ fn feishu_tool_metadata_catalog_is_self_consistent() {
 #[cfg(all(feature = "tool-file", feature = "tool-websearch"))]
 #[test]
 fn tool_search_creates_tool_lease_secret_under_scoped_runtime_home() {
-    let root = unique_tool_temp_dir("loongclaw-tool-search-home-override");
+    let root = unique_temp_dir("loongclaw-tool-search-home-override");
     let memory_dir = root.join("memory");
 
     std::fs::create_dir_all(&memory_dir).expect("create memory dir");
 
     let config = test_tool_runtime_config(root);
-    let expected_home = config._runtime_home.path().to_path_buf();
+    let expected_home = config.runtime_home().path().to_path_buf();
     let expected_secret = expected_home.join("tool-lease-secret.hex");
     let payload = json!({
         "query": "edit file",
