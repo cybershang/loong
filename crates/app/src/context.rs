@@ -196,7 +196,7 @@ mod tests {
     use super::*;
     use crate::config::MemoryProfile;
     use crate::memory::runtime_config::MemoryRuntimeConfig;
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
 
     #[test]
     fn bootstrap_kernel_context_with_config_writes_jsonl_audit_events() {

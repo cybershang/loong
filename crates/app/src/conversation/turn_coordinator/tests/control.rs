@@ -409,7 +409,7 @@ impl ConversationRuntime for ExplicitSkillActivationRuntime {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn handle_turn_with_runtime_explicit_skill_activation_prefix_injects_skill_context() {
     let workspace_root =
-        crate::test_support::unique_temp_dir("turn-coordinator-explicit-skill-activation");
+        crate::test_utils::unique_temp_dir("turn-coordinator-explicit-skill-activation");
     std::fs::create_dir_all(workspace_root.join(".loong/skills/demo-skill"))
         .expect("create skill root");
     std::fs::write(
@@ -499,7 +499,7 @@ async fn handle_turn_with_runtime_explicit_skill_activation_prefix_injects_skill
 async fn handle_turn_with_runtime_explicit_skill_activation_preserves_observer_streaming_followup()
 {
     let workspace_root =
-        crate::test_support::unique_temp_dir("turn-coordinator-explicit-skill-activation-observer");
+        crate::test_utils::unique_temp_dir("turn-coordinator-explicit-skill-activation-observer");
     std::fs::create_dir_all(workspace_root.join(".loong/skills/demo-skill"))
         .expect("create skill root");
     std::fs::write(

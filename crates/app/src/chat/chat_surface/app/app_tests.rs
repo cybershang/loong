@@ -21,7 +21,7 @@ use crate::chat::{
     CliChatOptions, CliSessionRequirement, initialize_cli_turn_runtime_with_loaded_config,
 };
 use crate::config::{LoongConfig, ProviderConfig, ProviderKind, ReasoningEffort};
-use crate::test_support::{ScopedEnv, unique_temp_dir};
+use crate::test_utils::{ScopedEnv, unique_temp_dir};
 #[cfg(feature = "memory-sqlite")]
 use crate::{
     chat::{CliRuntimeSessionOrigin, RouteOrigin, rebuild_active_session_route},

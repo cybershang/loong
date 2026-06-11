@@ -96,7 +96,7 @@ pub(super) fn load_summary_body_for_durable_flush(
 
 pub(super) fn ensure_summary_checkpoint_storage_layout(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("summary_checkpoint_metadata");
+    test_utils::record_sqlite_schema_repair("summary_checkpoint_metadata");
 
     if sqlite_table_columns(conn, "memory_summary_checkpoints")?.is_empty() {
         conn.execute_batch(
@@ -652,7 +652,7 @@ fn stream_summary_rows_until_saturation(
         .map_err(|error| format!("{row_error_context}: {error}"))?
     {
         #[cfg(test)]
-        test_support::record_summary_row_observed();
+        test_utils::record_summary_row_observed();
         let turn_id = row
             .get_ref(0)
             .map_err(|error| format!("decode summary turn id failed: {error}"))?
@@ -665,7 +665,7 @@ fn stream_summary_rows_until_saturation(
         }
 
         #[cfg(test)]
-        test_support::record_summary_payload_decode();
+        test_utils::record_summary_payload_decode();
         let role = row
             .get_ref(1)
             .map_err(|error| format!("decode summary turn role failed: {error}"))?
@@ -696,7 +696,7 @@ fn query_summary_frontier_turn_id_up_to_id(
     through_turn_id: i64,
 ) -> Result<Option<i64>, String> {
     #[cfg(test)]
-    test_support::record_summary_frontier_probe("rebuild");
+    test_utils::record_summary_frontier_probe("rebuild");
 
     let mut stmt = prepare_cached_sqlite_statement(
         conn,
@@ -724,7 +724,7 @@ fn query_summary_frontier_turn_id_between_ids(
     before_turn_id: i64,
 ) -> Result<Option<i64>, String> {
     #[cfg(test)]
-    test_support::record_summary_frontier_probe("catch_up");
+    test_utils::record_summary_frontier_probe("catch_up");
 
     let mut stmt = prepare_cached_sqlite_statement(
         conn,
@@ -754,7 +754,7 @@ fn stream_summary_turns_up_to_id(
     summary_budget_chars: usize,
 ) -> Result<Option<i64>, String> {
     #[cfg(test)]
-    test_support::record_summary_streaming_query("rebuild");
+    test_utils::record_summary_streaming_query("rebuild");
 
     let mut stmt = prepare_cached_sqlite_statement(
         conn,
@@ -790,7 +790,7 @@ fn stream_summary_turns_between_ids(
     summary_budget_chars: usize,
 ) -> Result<Option<i64>, String> {
     #[cfg(test)]
-    test_support::record_summary_streaming_query("catch_up");
+    test_utils::record_summary_streaming_query("catch_up");
 
     let mut stmt = prepare_cached_sqlite_statement(
         conn,
@@ -1612,9 +1612,9 @@ fn collect_initial_summary_first_visible_turn(
 
         if first_visible_turn_id.is_none() {
             #[cfg(test)]
-            test_support::record_summary_row_observed();
+            test_utils::record_summary_row_observed();
             #[cfg(test)]
-            test_support::record_summary_payload_decode();
+            test_utils::record_summary_payload_decode();
             *first_visible_turn_id = Some(turn_id);
             *first_visible_role = Some(role.to_owned());
             *first_visible_content = Some(content.to_owned());

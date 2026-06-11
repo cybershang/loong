@@ -8,7 +8,7 @@ use crate::session::repository::{
     NewSessionEvent, NewSessionRecord, SessionKind, SessionRepository, SessionState,
 };
 use crate::test_support::TurnTestHarness;
-use crate::test_support::unique_temp_dir;
+use crate::test_utils::unique_temp_dir;
 #[cfg(feature = "memory-sqlite")]
 use serde_json::json;
 #[cfg(feature = "memory-sqlite")]

@@ -349,7 +349,7 @@ mod tests {
 
     fn temp_dir(label: &str) -> std::path::PathBuf {
         let prefix = format!("loong-feishu-runtime-{label}");
-        crate::test_support::unique_temp_dir(prefix.as_str())
+        crate::test_utils::unique_temp_dir(prefix.as_str())
     }
 
     fn sample_grant(account_id: &str, open_id: &str, now_s: i64) -> FeishuGrant {

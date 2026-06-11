@@ -809,7 +809,7 @@ mod tests {
     }
 
     fn hydrated_memory_temp_dir(prefix: &str) -> std::path::PathBuf {
-        crate::test_support::unique_temp_dir(prefix)
+        crate::test_utils::unique_temp_dir(prefix)
     }
 
     #[cfg(feature = "memory-sqlite")]

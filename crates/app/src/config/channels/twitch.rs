@@ -340,7 +340,7 @@ mod tests {
 
     #[test]
     fn twitch_resolves_access_token_and_base_urls_from_env_pointer() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set("TEST_TWITCH_ACCESS_TOKEN", "twitch-user-token");
 
         let config_value = json!({
@@ -468,7 +468,7 @@ mod tests {
 
     #[test]
     fn twitch_empty_account_override_inherits_top_level_access_token_env() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set("CUSTOM_TWITCH_TOKEN", "custom-top-level-token");
 
         let config_value = json!({

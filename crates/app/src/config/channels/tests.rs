@@ -704,7 +704,7 @@ fn wecom_resolve_account_for_session_account_id_matches_runtime_identity() {
 
 #[test]
 fn line_resolves_account_credentials_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("TEST_LINE_CHANNEL_ACCESS_TOKEN", "line-access-token");
     env.set("TEST_LINE_CHANNEL_SECRET", "line-channel-secret");
 
@@ -800,7 +800,7 @@ fn line_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn dingtalk_resolves_webhook_url_and_secret_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set(
         "TEST_DINGTALK_WEBHOOK_URL",
         "https://oapi.dingtalk.com/robot/send?access_token=test-token",
@@ -891,7 +891,7 @@ fn dingtalk_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn webhook_resolves_endpoint_and_secrets_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set(
         "TEST_WEBHOOK_ENDPOINT_URL",
         "https://hooks.example.test/ingest?token=secret",
@@ -1051,7 +1051,7 @@ fn webhook_account_without_env_overrides_inherits_top_level_env_names() {
 
 #[test]
 fn google_chat_resolves_webhook_url_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set(
         "TEST_GOOGLE_CHAT_WEBHOOK_URL",
         "https://chat.googleapis.com/v1/spaces/AAAA/messages?key=test-key&token=test-token",
@@ -1135,7 +1135,7 @@ fn google_chat_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn nextcloud_talk_resolves_server_url_and_shared_secret_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set(
         "TEST_NEXTCLOUD_TALK_SERVER_URL",
         "https://cloud.example.test",
@@ -1226,7 +1226,7 @@ fn nextcloud_talk_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn synology_chat_resolves_token_and_incoming_url_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("TEST_SYNOLOGY_CHAT_TOKEN", "synology-outgoing-token");
     env.set(
             "TEST_SYNOLOGY_CHAT_INCOMING_URL",
@@ -1325,7 +1325,7 @@ fn synology_chat_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn teams_resolves_webhook_and_future_serve_credentials_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set(
         "TEST_TEAMS_WEBHOOK_URL",
         "https://teams.example.test/webhook/connector",
@@ -1449,7 +1449,7 @@ fn teams_multi_account_resolution_merges_send_and_future_serve_overrides() {
 
 #[test]
 fn imessage_resolves_bridge_url_and_token_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set(
         "TEST_IMESSAGE_BRIDGE_URL",
         "https://bluebubbles.example.test/base",
@@ -1555,7 +1555,7 @@ fn imessage_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn mattermost_resolves_server_url_and_bot_token_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set(
         "TEST_MATTERMOST_SERVER_URL",
         "https://mattermost.example.test",
@@ -1646,7 +1646,7 @@ fn mattermost_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn signal_resolves_account_and_service_url_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("TEST_SIGNAL_ACCOUNT", "+15550001111");
     env.set("TEST_SIGNAL_SERVICE_URL", "http://signal.example.test:8080");
 
@@ -1792,7 +1792,7 @@ fn whatsapp_partial_deserialization_keeps_default_env_pointers() {
 
 #[test]
 fn signal_default_service_url_env_override_wins_over_fallback() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("SIGNAL_SERVICE_URL", "http://signal.override.test:8080");
 
     let config = SignalChannelConfig::default();
@@ -1857,7 +1857,7 @@ fn signal_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn whatsapp_resolves_phone_number_id_from_env_pointer() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("TEST_WHATSAPP_PHONE_NUMBER_ID", "1234567890");
 
     let config_value = json!({

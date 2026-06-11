@@ -15,7 +15,7 @@ use crate::{
         AcpSessionState, AcpSessionStore, AcpSqliteSessionStore,
     },
     config::LoongConfig,
-    test_support::ScopedEnv,
+    test_utils::ScopedEnv,
 };
 
 use super::*;

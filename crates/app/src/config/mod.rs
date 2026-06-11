@@ -175,7 +175,7 @@ mod tests {
     use loong_contracts::SecretRef;
 
     use super::*;
-    use crate::test_support::{ScopedEnv, ScopedLoongHome};
+    use crate::test_utils::{ScopedEnv, ScopedLoongHome};
     use std::collections::BTreeSet;
 
     fn clear_config_test_secret_envs(env: &mut ScopedEnv) {

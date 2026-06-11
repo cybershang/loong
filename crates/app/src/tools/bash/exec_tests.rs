@@ -1,5 +1,5 @@
 use super::super::*;
-use super::*;
+use crate::test_utils::unique_temp_dir;
 use crate::tools::test_utils::*;
 use serde_json::json;
 
@@ -7,8 +7,8 @@ fn execute_tool_core_for_subprocess_test(
     request: ToolCoreRequest,
     config: &runtime_config::ToolRuntimeConfig,
 ) -> Result<ToolCoreOutcome, String> {
-    let _guard = crate::test_support::acquire_subprocess_test_guard();
-    let _env = crate::test_support::ScopedEnv::new();
+    let _guard = crate::test_utils::acquire_subprocess_test_guard();
+    let _env = crate::test_utils::ScopedEnv::new();
     execute_tool_core_with_config(request, config)
 }
 
@@ -16,15 +16,15 @@ fn execute_tool_core_with_trusted_subprocess_test_context(
     request: ToolCoreRequest,
     config: &runtime_config::ToolRuntimeConfig,
 ) -> Result<ToolCoreOutcome, String> {
-    let _guard = crate::test_support::acquire_subprocess_test_guard();
-    let _env = crate::test_support::ScopedEnv::new();
+    let _guard = crate::test_utils::acquire_subprocess_test_guard();
+    let _env = crate::test_utils::ScopedEnv::new();
     execute_tool_core_with_test_context(request, config)
 }
 
 #[cfg(feature = "tool-shell")]
 #[test]
 fn runtime_tool_view_hides_bash_exec_when_runtime_is_unavailable() {
-    let root = crate::test_support::unique_temp_dir("loong-bash-tool-view-hidden");
+    let root = crate::test_utils::unique_temp_dir("loong-bash-tool-view-hidden");
     std::fs::create_dir_all(&root).expect("create root dir");
 
     let config = test_tool_runtime_config(root);
@@ -36,7 +36,7 @@ fn runtime_tool_view_hides_bash_exec_when_runtime_is_unavailable() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn runtime_tool_view_includes_bash_exec_when_runtime_is_available() {
-    let root = unique_tool_temp_dir("loong-bash-tool-view-visible");
+    let root = unique_temp_dir("loong-bash-tool-view-visible");
     std::fs::create_dir_all(&root).expect("create root dir");
 
     let mut config = test_tool_runtime_config(root);
@@ -49,7 +49,7 @@ fn runtime_tool_view_includes_bash_exec_when_runtime_is_available() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_hides_bash_exec_when_runtime_is_unavailable() {
-    let root = unique_tool_temp_dir("loong-bash-tool-search-hidden");
+    let root = unique_temp_dir("loong-bash-tool-search-hidden");
     std::fs::create_dir_all(&root).expect("create root dir");
 
     let config = test_tool_runtime_config(root);
@@ -72,7 +72,7 @@ fn tool_search_hides_bash_exec_when_runtime_is_unavailable() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_hides_bash_exec_when_governance_rules_failed_to_load() {
-    let root = unique_tool_temp_dir("loong-bash-tool-search-broken-rules");
+    let root = unique_temp_dir("loong-bash-tool-search-broken-rules");
     std::fs::create_dir_all(&root).expect("create root dir");
 
     let mut config = test_tool_runtime_config(root);
@@ -100,7 +100,7 @@ fn tool_search_hides_bash_exec_when_governance_rules_failed_to_load() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_routes_bash_capabilities_to_exec_when_runtime_is_available() {
-    use crate::{test_support::unique_temp_dir, tools::execute_tool_core_with_config};
+    use super::super::execute_tool_core_with_config;
 
     let root = unique_temp_dir("loong-bash-tool-search-visible");
     std::fs::create_dir_all(&root).expect("create root dir");
@@ -131,7 +131,7 @@ fn tool_search_routes_bash_capabilities_to_exec_when_runtime_is_available() {
 #[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_exact_bash_query_surfaces_bash() {
-    let root = unique_tool_temp_dir("loong-bash-tool-search-exact-query");
+    let root = unique_temp_dir("loong-bash-tool-search-exact-query");
     std::fs::create_dir_all(&root).expect("create root dir");
 
     let mut config = test_tool_runtime_config(root);
@@ -160,7 +160,7 @@ fn tool_search_exact_bash_query_surfaces_bash() {
 fn bash_exec_catalog_exposes_command_cwd_and_timeout_ms() {
     use crate::tools::catalog;
 
-    let catalog = tools_catalog();
+    let catalog = tool_catalog();
     let descriptor = catalog
         .descriptor("bash.exec")
         .expect("bash.exec should be in the catalog");
@@ -370,7 +370,7 @@ fn bash_exec_falls_back_to_file_root_when_current_dir_is_unavailable() {
         ..runtime_config::BashExecRuntimePolicy::default()
     };
 
-    let cwd_guard = crate::test_support::ScopedCurrentDir::new(&deleted_cwd);
+    let cwd_guard = crate::test_utils::ScopedCurrentDir::new(&deleted_cwd);
     fs::remove_dir_all(&deleted_cwd).expect("remove deleted cwd");
 
     let outcome = execute_tool_core_for_subprocess_test(
@@ -406,7 +406,7 @@ const BASH_EMPTY_PATH_PROBE_ENV: &str = "LOONG_BASH_EMPTY_PATH_PROBE";
 #[cfg(all(feature = "tool-shell", unix))]
 #[test]
 fn bash_exec_succeeds_when_path_is_empty_but_stable_search_path_can_find_runtime() {
-    let _subprocess_guard = crate::test_support::acquire_subprocess_test_guard();
+    let _subprocess_guard = crate::test_utils::acquire_subprocess_test_guard();
     let output = std::process::Command::new(std::env::current_exe().expect("current test binary"))
         .arg("--exact")
         .arg("tools::tests::bash_exec_tests::bash_exec_empty_path_probe")
@@ -539,7 +539,7 @@ fn bash_exec_allows_plain_command_when_prefix_rule_allows() {
 fn bash_exec_uses_loong_home_rules_dir_even_when_runtime_is_built_without_config_path() {
     use std::fs;
 
-    let home = crate::test_support::ScopedLoongHome::new("loong-bash-home-rules");
+    let home = crate::test_utils::ScopedLoongHome::new("loong-bash-home-rules");
     let workspace = unique_tool_temp_dir("loong-bash-home-rules-workspace");
     let rules_dir = home.path().join("rules");
     fs::create_dir_all(&rules_dir).expect("rules dir");
@@ -549,7 +549,7 @@ fn bash_exec_uses_loong_home_rules_dir_even_when_runtime_is_built_without_config
     )
     .expect("rule file");
     fs::create_dir_all(&workspace).expect("workspace");
-    let _cwd = crate::test_support::ScopedCurrentDir::new(&workspace);
+    let _cwd = crate::test_utils::ScopedCurrentDir::new(&workspace);
 
     let mut runtime = runtime_config::ToolRuntimeConfig::from_loong_config(
         &crate::config::LoongConfig::default(),

@@ -155,7 +155,7 @@ mod latest_cli_session_selector_tests {
     use crate::session::repository::SessionRepository;
     use crate::session::repository::SessionState;
     use crate::session::store;
-    use crate::test_support::unique_temp_dir;
+    use crate::test_utils::unique_temp_dir;
     use rusqlite::Connection;
     use rusqlite::params;
     use std::path::Path;

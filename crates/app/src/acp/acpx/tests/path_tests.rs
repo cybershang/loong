@@ -40,7 +40,7 @@ fi
 exit 0
 "#,
     );
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("PATH", &temp_dir);
     let config = fake_acpx_config(&script_path, &temp_dir);
     let backend = AcpxCliProbeBackend;
@@ -122,7 +122,7 @@ fi
 exit 0
 "#,
     );
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("PATH", &temp_dir);
     let config = fake_acpx_config(&script_path, &temp_dir);
     let backend = AcpxCliProbeBackend;
@@ -216,7 +216,7 @@ fi
 exit 0
 "#,
     );
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("PATH", &temp_dir);
     let config = fake_acpx_config(&script_path, &temp_dir);
     let backend = AcpxCliProbeBackend;

@@ -209,7 +209,7 @@ mod tests {
     use std::path::PathBuf;
 
     use crate::config::{LoongConfig, MemoryProfile};
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
 
     use super::*;
 

@@ -1,6 +1,6 @@
 use super::*;
 use crate::config::MemoryProfile;
-use crate::test_support::ScopedCurrentDir;
+use crate::test_utils::ScopedCurrentDir;
 use serde_json::json;
 
 fn sqlite_test_config(db_path: impl Into<PathBuf>) -> MemoryRuntimeConfig {

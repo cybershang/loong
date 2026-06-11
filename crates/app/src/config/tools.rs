@@ -1376,7 +1376,7 @@ fn normalize_domain_entries(entries: &[String]) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_support::{ScopedEnv, ScopedLoongHome};
+    use crate::test_utils::{ScopedEnv, ScopedLoongHome};
 
     #[test]
     fn tool_config_defaults_expose_session_runtime_policy() {

@@ -179,12 +179,12 @@ pub(super) fn normalize_runtime_db_path(path: &Path) -> Result<PathBuf, String> 
         .cloned()
     {
         #[cfg(test)]
-        test_support::record_runtime_path_normalization_alias_hit();
+        test_utils::record_runtime_path_normalization_alias_hit();
         return Ok(normalized_path);
     }
 
     #[cfg(test)]
-    test_support::record_runtime_path_normalization_full();
+    test_utils::record_runtime_path_normalization_full();
 
     let normalized = if absolute.exists() {
         dunce::canonicalize(&absolute)
@@ -229,7 +229,7 @@ pub(super) fn prepare_cached_sqlite_statement<'conn>(
     error_context: &'static str,
 ) -> Result<rusqlite::CachedStatement<'conn>, String> {
     #[cfg(test)]
-    test_support::record_cached_prepare(sql);
+    test_utils::record_cached_prepare(sql);
 
     conn.prepare_cached(sql)
         .map_err(|error| format!("{error_context}: {error}"))
@@ -277,7 +277,7 @@ fn acquire_sqlite_runtime_with_diagnostics(
     }
 
     #[cfg(test)]
-    test_support::wait_for_sqlite_runtime_cache_miss(&normalized_path);
+    test_utils::wait_for_sqlite_runtime_cache_miss(&normalized_path);
 
     let bootstrap_lock = {
         let mut bootstrap_registry =
@@ -393,7 +393,7 @@ pub(super) fn open_sqlite_connection_with_diagnostics(
     if requires_current_schema_setup {
         let schema_init_started_at = StdInstant::now();
         #[cfg(test)]
-        test_support::record_sqlite_schema_init(path);
+        test_utils::record_sqlite_schema_init(path);
         conn.execute_batch(
             "
             CREATE TABLE IF NOT EXISTS turns(
@@ -598,7 +598,7 @@ pub(super) fn open_sqlite_connection_with_diagnostics(
     diagnostics.schema_upgrade_ms = elapsed_ms(schema_upgrade_started_at);
 
     #[cfg(test)]
-    test_support::record_sqlite_bootstrap(path);
+    test_utils::record_sqlite_bootstrap(path);
 
     Ok((conn, diagnostics))
 }

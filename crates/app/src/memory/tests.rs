@@ -12,7 +12,7 @@ fn core_dispatch_test_lock() -> &'static Mutex<()> {
 
 #[cfg(feature = "memory-sqlite")]
 fn isolated_memory_workspace(prefix: &str) -> (PathBuf, runtime_config::MemoryRuntimeConfig) {
-    let root = crate::test_support::unique_temp_dir(prefix);
+    let root = crate::test_utils::unique_temp_dir(prefix);
     std::fs::create_dir_all(&root).expect("create isolated memory workspace");
 
     let db_path = root.join("memory.sqlite3");
@@ -354,7 +354,7 @@ fn load_prompt_context_with_diagnostics_omits_legacy_identity_from_profile_proje
 fn load_prompt_context_with_diagnostics_projects_typed_personalization_without_profile_note() {
     use crate::config::MemoryProfile;
 
-    let workspace_root = crate::test_support::unique_temp_dir(
+    let workspace_root = crate::test_utils::unique_temp_dir(
         "loong-test-memory-profile-diagnostics-personalization",
     );
     std::fs::create_dir_all(&workspace_root).expect("create diagnostics workspace");
@@ -440,7 +440,7 @@ fn load_prompt_context_with_diagnostics_uses_selected_memory_system_id_in_proven
 #[cfg(feature = "memory-sqlite")]
 #[test]
 fn pre_compaction_durable_flush_deduplicates_repeated_summary_exports() {
-    let durable_flush_lock = crate::test_support::durable_memory_flush_test_lock();
+    let durable_flush_lock = crate::test_utils::durable_memory_flush_test_lock();
     let _durable_flush_guard = durable_flush_lock.blocking_lock();
     let _guard = core_dispatch_test_lock()
         .lock()
@@ -507,7 +507,7 @@ fn pre_compaction_durable_flush_deduplicates_repeated_summary_exports() {
 #[cfg(feature = "memory-sqlite")]
 #[test]
 fn pre_compaction_durable_flush_skips_when_no_summary_checkpoint_exists() {
-    let durable_flush_lock = crate::test_support::durable_memory_flush_test_lock();
+    let durable_flush_lock = crate::test_utils::durable_memory_flush_test_lock();
     let _durable_flush_guard = durable_flush_lock.blocking_lock();
     let _guard = core_dispatch_test_lock()
         .lock()
@@ -562,16 +562,16 @@ fn append_turn_direct_bypasses_core_dispatch() {
 
     let config = sqlite_memory_config(db_path.clone());
 
-    super::test_support::begin_core_dispatch_capture();
+    super::test_utils::begin_core_dispatch_capture();
     append_turn_direct("append-fast-path-session", "user", "hello", &config)
         .expect("append_turn_direct should succeed");
 
     assert_eq!(
-        super::test_support::core_dispatch_count(),
+        super::test_utils::core_dispatch_count(),
         0,
         "append_turn_direct should bypass core dispatch"
     );
-    super::test_support::end_core_dispatch_capture();
+    super::test_utils::end_core_dispatch_capture();
 
     let _ = fs::remove_file(&db_path);
     let _ = fs::remove_dir(&tmp);
@@ -598,18 +598,18 @@ fn window_direct_bypasses_core_dispatch() {
 
     append_turn_direct("window-fast-path-session", "user", "hello", &config)
         .expect("seed append_turn_direct should succeed");
-    super::test_support::begin_core_dispatch_capture();
+    super::test_utils::begin_core_dispatch_capture();
 
     let turns = window_direct("window-fast-path-session", 10, &config)
         .expect("window_direct should succeed");
 
     assert_eq!(turns.len(), 1);
     assert_eq!(
-        super::test_support::core_dispatch_count(),
+        super::test_utils::core_dispatch_count(),
         0,
         "window_direct should bypass core dispatch"
     );
-    super::test_support::end_core_dispatch_capture();
+    super::test_utils::end_core_dispatch_capture();
 
     let _ = fs::remove_file(&db_path);
     let _ = fs::remove_dir(&tmp);
@@ -905,7 +905,7 @@ async fn registry_selected_system_can_use_compact_stage_hook_without_custom_runt
 
     ensure_registry_compact_hook_system_registered();
 
-    let workspace_root = crate::test_support::unique_temp_dir("compact-hook-workspace");
+    let workspace_root = crate::test_utils::unique_temp_dir("compact-hook-workspace");
     std::fs::create_dir_all(&workspace_root).expect("create compact hook workspace");
     EXPECTED_COMPACT_HOOK_SESSION_ID
         .set("compact-hook-session".to_owned())

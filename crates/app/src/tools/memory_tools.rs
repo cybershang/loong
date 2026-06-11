@@ -1199,7 +1199,7 @@ fn memory_document_metadata_payload(document: &ParsedWorkspaceMemoryDocument) ->
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_support::unique_temp_dir;
+    use crate::test_utils::unique_temp_dir;
 
     #[cfg(all(feature = "tool-file", feature = "memory-sqlite"))]
     #[test]

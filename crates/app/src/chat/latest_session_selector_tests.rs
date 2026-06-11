@@ -3,7 +3,7 @@ use super::*;
 use crate::conversation::ConversationRuntimeBinding;
 use crate::session::repository::{NewSessionRecord, SessionKind, SessionRepository, SessionState};
 use crate::session::store;
-use crate::test_support::unique_temp_dir;
+use crate::test_utils::unique_temp_dir;
 use rusqlite::{Connection, params};
 use std::path::{Path, PathBuf};
 

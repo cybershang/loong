@@ -4,7 +4,7 @@ pub(super) fn ensure_turn_session_index_and_state_metadata(
     conn: &Connection,
 ) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("turn_session_index");
+    test_utils::record_sqlite_schema_repair("turn_session_index");
 
     if !sqlite_table_has_column(conn, "turns", "session_turn_index")? {
         conn.execute(
@@ -105,7 +105,7 @@ pub(super) fn ensure_turn_session_index_and_state_metadata(
 
 pub(super) fn ensure_session_tree_storage(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("session_tree");
+    test_utils::record_sqlite_schema_repair("session_tree");
 
     conn.execute_batch(
         "
@@ -286,7 +286,7 @@ fn ensure_session_head_mode_storage(conn: &Connection) -> Result<(), String> {
 
 pub(super) fn ensure_session_terminal_outcome_storage(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("session_terminal_outcomes");
+    test_utils::record_sqlite_schema_repair("session_terminal_outcomes");
 
     conn.execute_batch(SESSION_TERMINAL_OUTCOMES_TABLE_SQL)
         .map_err(|error| format!("ensure session terminal outcome storage failed: {error}"))?;
@@ -309,7 +309,7 @@ pub(super) fn ensure_session_terminal_outcome_storage(conn: &Connection) -> Resu
 
 pub(super) fn ensure_session_event_search_storage(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("session_event_search");
+    test_utils::record_sqlite_schema_repair("session_event_search");
 
     if !sqlite_table_has_column(conn, "session_events", "search_text")? {
         conn.execute(
@@ -512,7 +512,7 @@ pub(super) fn session_event_search_text(event_kind: &str, payload_json: &str) ->
 
 pub(super) fn ensure_approval_lifecycle_tables(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("approval_lifecycle");
+    test_utils::record_sqlite_schema_repair("approval_lifecycle");
 
     conn.execute_batch(
         "
@@ -552,7 +552,7 @@ pub(super) fn ensure_approval_lifecycle_tables(conn: &Connection) -> Result<(), 
 
 pub(super) fn ensure_control_plane_pairing_tables(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("control_plane_pairing");
+    test_utils::record_sqlite_schema_repair("control_plane_pairing");
 
     conn.execute_batch(
         "
@@ -595,7 +595,7 @@ pub(super) fn ensure_control_plane_pairing_tables(conn: &Connection) -> Result<(
 
 pub(super) fn ensure_session_tool_consent_storage(conn: &mut Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("session_tool_consent");
+    test_utils::record_sqlite_schema_repair("session_tool_consent");
 
     conn.execute_batch(
         "
@@ -624,7 +624,7 @@ pub(super) fn ensure_session_tool_consent_storage(conn: &mut Connection) -> Resu
 
 pub(super) fn ensure_session_tool_policy_storage(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("session_tool_policy");
+    test_utils::record_sqlite_schema_repair("session_tool_policy");
 
     conn.execute_batch(
         "

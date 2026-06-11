@@ -456,7 +456,6 @@ fn now_unix_seconds() -> u64 {
     duration.as_secs()
 }
 
-#[cfg(test)]
 pub(crate) fn clear_tool_lease_secret_cache_for_tests() {
     let cache = tool_lease_secret_cache();
     let guard = cache.lock();
@@ -476,7 +475,7 @@ mod tests {
     use super::read_tool_lease_secret_after_competitor_publish;
     use super::read_tool_lease_secret_file;
     use super::validate_tool_lease;
-    use crate::test_support::ScopedLoongHome;
+    use crate::test_utils::ScopedLoongHome;
 
     fn scoped_tool_lease_home(prefix: &str) -> ScopedLoongHome {
         ScopedLoongHome::new(prefix)
@@ -526,7 +525,7 @@ mod tests {
             let barrier = Arc::clone(&barrier);
             let home_path = home_path.clone();
             let handle = std::thread::spawn(move || {
-                let _thread_home = crate::test_support::ScopedLoongHome::from_existing(home_path);
+                let _thread_home = crate::test_utils::ScopedLoongHome::from_existing(home_path);
                 let payload = serde_json::Map::new();
                 barrier.wait();
                 issue_tool_lease("file.read", &payload)
@@ -669,7 +668,7 @@ mod tests {
             let home_path = home_path.clone();
             let payload = payload.clone();
             let handle = std::thread::spawn(move || {
-                let _thread_home = crate::test_support::ScopedLoongHome::from_existing(home_path);
+                let _thread_home = crate::test_utils::ScopedLoongHome::from_existing(home_path);
                 barrier.wait();
                 issue_tool_lease("file.read", &payload)
             });

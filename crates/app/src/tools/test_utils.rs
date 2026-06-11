@@ -1,5 +1,5 @@
 use super::*;
-use crate::test_support::*;
+use crate::test_utils::*;
 use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 
@@ -13,7 +13,7 @@ pub fn ready_bash_exec_runtime_policy() -> runtime_config::BashExecRuntimePolicy
 }
 
 #[cfg(all(feature = "tool-shell", unix))]
-fn configured_test_bash_runtime_with_rules(
+pub fn configured_test_bash_runtime_with_rules(
     root: &Path,
 ) -> (runtime_config::BashExecRuntimePolicy, PathBuf) {
     let log_path = root.join("bash-args.log");
@@ -37,13 +37,13 @@ fn configured_test_bash_runtime_with_rules(
 }
 
 #[cfg(all(feature = "tool-shell", unix))]
-fn write_fake_bash_runtime(root: &Path, name: &str, log_path: &Path) -> PathBuf {
+pub fn write_fake_bash_runtime(root: &Path, name: &str, log_path: &Path) -> PathBuf {
     let path = root.join(name);
     let script = format!(
         "#!/bin/sh\nLOG_PATH=\"{}\"\n: > \"$LOG_PATH\"\nfor arg in \"$@\"; do\n  printf '%s\\n' \"$arg\" >> \"$LOG_PATH\"\ndone\nMODE=\"${{1:-}}\"\nCOMMAND=\"${{2:-}}\"\ncase \"$MODE\" in\n  -c|-lc)\n    exec /bin/sh -c \"$COMMAND\"\n    ;;\n  *)\n    printf 'unexpected bash args: %s' \"$*\" >&2\n    exit 97\n    ;;\nesac\n",
         log_path.display()
     );
-    crate::test_support::write_executable_script_atomically(&path, &script)
+    crate::test_utils::write_executable_script_atomically(&path, &script)
         .expect("write fake bash runtime");
     path
 }
@@ -59,7 +59,7 @@ pub fn execute_tool_core_with_test_context(
     }
 }
 
-struct ToolTestRuntimeConfig {
+pub struct ToolTestRuntimeConfig {
     config: runtime_config::ToolRuntimeConfig,
     _runtime_home: ScopedLoongHome,
 }

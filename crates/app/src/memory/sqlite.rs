@@ -33,7 +33,7 @@ mod search;
 mod summary;
 #[cfg(test)]
 #[path = "sqlite/sqlite_test_support_tests.rs"]
-mod test_support;
+mod test_utils;
 #[cfg(test)]
 #[path = "sqlite/sqlite_core_tests.rs"]
 mod tests;
@@ -1962,42 +1962,42 @@ fn normalize_required_str<'a>(
 
 #[cfg(test)]
 fn sqlite_bootstrap_count_for_tests(path: &Path) -> usize {
-    test_support::sqlite_bootstrap_count(path)
+    test_utils::sqlite_bootstrap_count(path)
 }
 
 #[cfg(test)]
 fn sqlite_bootstrap_count_under_prefix_for_tests(path: &Path) -> usize {
-    test_support::sqlite_bootstrap_count_under_prefix(path)
+    test_utils::sqlite_bootstrap_count_under_prefix(path)
 }
 
 #[cfg(test)]
 fn sqlite_schema_repair_count_for_tests(kind: &'static str) -> usize {
-    test_support::sqlite_schema_repair_count(kind)
+    test_utils::sqlite_schema_repair_count(kind)
 }
 
 #[cfg(test)]
 fn sqlite_schema_init_count_for_tests(path: &Path) -> usize {
-    test_support::sqlite_schema_init_count(path)
+    test_utils::sqlite_schema_init_count(path)
 }
 
 #[cfg(test)]
 fn runtime_path_normalization_full_count_for_tests() -> usize {
-    test_support::runtime_path_normalization_full_count()
+    test_utils::runtime_path_normalization_full_count()
 }
 
 #[cfg(test)]
 fn runtime_path_normalization_alias_hit_count_for_tests() -> usize {
-    test_support::runtime_path_normalization_alias_hit_count()
+    test_utils::runtime_path_normalization_alias_hit_count()
 }
 
 #[cfg(test)]
 fn reset_cached_prepare_metrics_for_tests() {
-    test_support::reset_cached_prepare_metrics();
+    test_utils::reset_cached_prepare_metrics();
 }
 
 #[cfg(test)]
 fn reset_sqlite_schema_repair_metrics_for_tests() {
-    test_support::reset_sqlite_schema_repair_metrics();
+    test_utils::reset_sqlite_schema_repair_metrics();
 }
 
 #[cfg(test)]
@@ -2006,70 +2006,70 @@ struct SqliteMetricCaptureGuard;
 #[cfg(test)]
 impl Drop for SqliteMetricCaptureGuard {
     fn drop(&mut self) {
-        test_support::end_sqlite_metric_capture();
+        test_utils::end_sqlite_metric_capture();
     }
 }
 
 #[cfg(test)]
 fn begin_sqlite_metric_capture_for_tests() -> SqliteMetricCaptureGuard {
-    test_support::begin_sqlite_metric_capture();
+    test_utils::begin_sqlite_metric_capture();
     SqliteMetricCaptureGuard
 }
 
 #[cfg(test)]
 fn cached_prepare_count_for_sql_fragment_for_tests(fragment: &str) -> usize {
-    test_support::cached_prepare_count_for_sql_fragment(fragment)
+    test_utils::cached_prepare_count_for_sql_fragment(fragment)
 }
 
 #[cfg(test)]
 fn reset_summary_materialization_metrics_for_tests() {
-    test_support::reset_summary_materialization_metrics();
+    test_utils::reset_summary_materialization_metrics();
 }
 
 #[cfg(test)]
 fn summary_buffered_query_count_for_tests(kind: &'static str) -> usize {
-    test_support::summary_buffered_query_count(kind)
+    test_utils::summary_buffered_query_count(kind)
 }
 
 #[cfg(test)]
 fn summary_streaming_query_count_for_tests(kind: &'static str) -> usize {
-    test_support::summary_streaming_query_count(kind)
+    test_utils::summary_streaming_query_count(kind)
 }
 
 #[cfg(test)]
 fn summary_payload_decode_count_for_tests() -> usize {
-    test_support::summary_payload_decode_count()
+    test_utils::summary_payload_decode_count()
 }
 
 #[cfg(test)]
 fn summary_row_observed_count_for_tests() -> usize {
-    test_support::summary_row_observed_count()
+    test_utils::summary_row_observed_count()
 }
 
 #[cfg(test)]
 fn summary_frontier_probe_count_for_tests(kind: &'static str) -> usize {
-    test_support::summary_frontier_probe_count(kind)
+    test_utils::summary_frontier_probe_count(kind)
 }
 
 #[cfg(test)]
 fn summary_normalization_count_for_tests() -> usize {
-    test_support::summary_normalization_count()
+    test_utils::summary_normalization_count()
 }
 
 #[cfg(test)]
 fn configure_sqlite_runtime_cache_miss_for_tests(path: &Path, target_waiters: usize) {
-    test_support::configure_sqlite_runtime_cache_miss(path, target_waiters);
+    test_utils::configure_sqlite_runtime_cache_miss(path, target_waiters);
 }
 
 #[cfg(test)]
 fn clear_sqlite_runtime_cache_miss_for_tests() {
-    test_support::clear_sqlite_runtime_cache_miss();
+    test_utils::clear_sqlite_runtime_cache_miss();
 }
 
 #[cfg(test)]
 fn reset_sqlite_runtime_test_state() {
     bootstrap::clear_sqlite_runtime_registries_for_tests();
-    test_support::reset_test_state();
+    test_utils::reset_test_state();
 }
 
 #[cfg(test)]

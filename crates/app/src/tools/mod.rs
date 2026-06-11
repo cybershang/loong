@@ -449,7 +449,7 @@ fn feishu_searchable_entries() -> Vec<SearchableToolEntry> {
 }
 
 #[cfg(test)]
-pub(self) mod test_utils;
+mod test_utils;
 
 #[cfg(test)]
 mod tests;

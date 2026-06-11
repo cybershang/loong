@@ -1628,7 +1628,7 @@ fn augment_tool_payload_injects_browser_scope_for_browse_request() {
 
 #[test]
 fn augment_tool_payload_uses_active_skill_root_for_absolute_direct_read_targets() {
-    let workspace_root = crate::test_support::unique_temp_dir("turn-engine-active-skill-workspace");
+    let workspace_root = crate::test_utils::unique_temp_dir("turn-engine-active-skill-workspace");
     let skill_root = workspace_root.join(".loong/skills/demo-skill");
     std::fs::create_dir_all(skill_root.join("references")).expect("create skill root");
     let reference_path = skill_root.join("references/guide.md");
@@ -1661,8 +1661,7 @@ fn augment_tool_payload_uses_active_skill_root_for_absolute_direct_read_targets(
 
 #[test]
 fn augment_tool_payload_uses_visible_skill_root_for_absolute_skill_direct_reads() {
-    let workspace_root =
-        crate::test_support::unique_temp_dir("turn-engine-visible-skill-workspace");
+    let workspace_root = crate::test_utils::unique_temp_dir("turn-engine-visible-skill-workspace");
     let skill_root = workspace_root.join(".loong/skills/demo-skill");
     std::fs::create_dir_all(&skill_root).expect("create skill root");
     let skill_path = skill_root.join("SKILL.md");
@@ -1696,7 +1695,7 @@ fn augment_tool_payload_uses_visible_skill_root_for_absolute_skill_direct_reads(
 #[test]
 fn augment_tool_payload_uses_visible_skill_root_for_absolute_skill_resource_direct_reads() {
     let workspace_root =
-        crate::test_support::unique_temp_dir("turn-engine-visible-skill-resource-workspace");
+        crate::test_utils::unique_temp_dir("turn-engine-visible-skill-resource-workspace");
     let skill_root = workspace_root.join(".loong/skills/demo-skill");
     std::fs::create_dir_all(skill_root.join("references")).expect("create skill root");
     let reference_path = skill_root.join("references/guide.md");
@@ -1730,7 +1729,7 @@ fn augment_tool_payload_uses_visible_skill_root_for_absolute_skill_resource_dire
 #[test]
 fn augment_tool_payload_uses_unique_active_skill_root_for_relative_direct_read_targets() {
     let workspace_root =
-        crate::test_support::unique_temp_dir("turn-engine-active-skill-relative-workspace");
+        crate::test_utils::unique_temp_dir("turn-engine-active-skill-relative-workspace");
     let first_skill_root = workspace_root.join(".loong/skills/demo-skill");
     let second_skill_root = workspace_root.join(".loong/skills/other-skill");
     std::fs::create_dir_all(first_skill_root.join("references")).expect("create first skill");
@@ -1769,7 +1768,7 @@ fn augment_tool_payload_uses_unique_active_skill_root_for_relative_direct_read_t
 #[test]
 fn augment_tool_payload_does_not_guess_when_relative_direct_read_matches_multiple_skill_roots() {
     let workspace_root =
-        crate::test_support::unique_temp_dir("turn-engine-active-skill-relative-ambiguous");
+        crate::test_utils::unique_temp_dir("turn-engine-active-skill-relative-ambiguous");
     let first_skill_root = workspace_root.join(".loong/skills/demo-skill");
     let second_skill_root = workspace_root.join(".loong/skills/other-skill");
     std::fs::create_dir_all(first_skill_root.join("references")).expect("create first skill");

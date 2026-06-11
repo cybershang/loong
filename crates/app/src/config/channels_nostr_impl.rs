@@ -501,7 +501,7 @@ mod tests {
 
     #[test]
     fn nostr_resolves_relay_urls_and_nsec_private_key_from_env_pointers() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set(
             "TEST_NOSTR_RELAY_URLS",
             "wss://relay-one.example.test,wss://relay-two.example.test",
@@ -608,7 +608,7 @@ mod tests {
 
     #[test]
     fn nostr_account_explicit_empty_relay_urls_do_not_fall_back_to_top_level_env() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set("CUSTOM_NOSTR_RELAY_URLS", "wss://relay.example.test");
 
         let config: NostrChannelConfig = serde_json::from_value(json!({

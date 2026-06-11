@@ -293,7 +293,7 @@ mod tests {
         hydrate_session_memory_context_with_workspace_root, load_session_prompt_context,
         window_session_turns,
     };
-    use crate::test_support::{ScopedEnv, unique_temp_dir};
+    use crate::test_utils::{ScopedEnv, unique_temp_dir};
 
     #[test]
     fn session_store_facade_round_trips_transcript_turns() {

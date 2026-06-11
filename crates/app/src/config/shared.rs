@@ -874,7 +874,7 @@ fn normalize_dollar_prefixed_env_name(raw: &str, fallback: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
 
     #[test]
     fn message_template_interpolation_replaces_known_placeholders() {

@@ -2,7 +2,7 @@ use super::*;
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::test_support::ScopedEnv;
+use crate::test_utils::ScopedEnv;
 use loong_contracts::SecretRef;
 
 fn encode_provider_descriptor(descriptor: &ProviderDescriptorDocument) -> Value {

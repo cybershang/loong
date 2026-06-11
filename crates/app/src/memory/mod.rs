@@ -143,7 +143,7 @@ pub fn execute_memory_core_with_config(
     config: &runtime_config::MemoryRuntimeConfig,
 ) -> Result<MemoryCoreOutcome, String> {
     #[cfg(test)]
-    test_support::record_core_dispatch();
+    test_utils::record_core_dispatch();
 
     let runtime = resolve_memory_system_runtime(config)?;
 
@@ -444,7 +444,7 @@ pub fn drop_cached_sqlite_runtime(path: &std::path::Path) -> Result<bool, String
 }
 
 #[cfg(test)]
-mod test_support {
+mod test_utils {
     use super::*;
 
     #[derive(Default)]

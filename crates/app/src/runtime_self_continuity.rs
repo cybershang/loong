@@ -334,7 +334,7 @@ pub(crate) const fn runtime_durable_recall_intro() -> &'static str {
 mod tests {
     use super::*;
     use crate::config::LoongConfig;
-    use crate::test_support::ScopedCurrentDir;
+    use crate::test_utils::ScopedCurrentDir;
     use serde_json::json;
     use tempfile::tempdir;
 

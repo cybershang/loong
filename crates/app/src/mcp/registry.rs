@@ -762,8 +762,8 @@ mod tests {
     use std::path::PathBuf;
 
     use crate::config::{AcpConfig, AcpxMcpServerConfig};
-    use crate::test_support::ScopedEnv;
-    use crate::test_support::unique_temp_dir;
+    use crate::test_utils::ScopedEnv;
+    use crate::test_utils::unique_temp_dir;
 
     use super::*;
     use crate::mcp::config::{McpConfig, McpServerConfig, McpServerTransportConfig};

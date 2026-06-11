@@ -347,7 +347,7 @@ mod tests {
         MemorySystemRuntimeFallbackKind,
     };
     use crate::memory::{MEMORY_SYSTEM_API_VERSION, MemoryRecallMode, MemorySystemCapability};
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
 
     fn clear_memory_runtime_env_overrides(env: &mut ScopedEnv) {
         env.remove(MEMORY_SYSTEM_ENV);

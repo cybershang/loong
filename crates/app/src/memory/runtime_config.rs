@@ -219,7 +219,7 @@ mod tests {
         MEMORY_SYSTEM_ENV, MemorySystem, MemorySystemCapability, MemorySystemMetadata,
         register_memory_system,
     };
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
 
     struct RuntimeConfigRegistryMemorySystem;
 

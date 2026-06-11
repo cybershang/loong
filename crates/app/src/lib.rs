@@ -36,6 +36,8 @@ pub mod workspace_guidance;
 mod process_env;
 #[doc(hidden)]
 pub mod process_launch;
+#[doc(hidden)]
+pub mod test_support;
 #[allow(
     clippy::expect_used,
     clippy::panic,
@@ -43,7 +45,8 @@ pub mod process_launch;
     clippy::missing_panics_doc
 )]
 #[doc(hidden)]
-pub mod test_support;
+#[cfg(test)]
+pub mod test_utils;
 
 #[cfg(feature = "feishu-integration")]
 pub use channel::feishu::api as feishu;
@@ -57,7 +60,7 @@ mod secret_runtime_tests {
 
     use loong_contracts::{SecretRef, SecretResolver};
 
-    use crate::test_support::unique_temp_dir;
+    use crate::test_utils::unique_temp_dir;
 
     #[test]
     fn default_secret_resolver_reads_file_secret_and_trims_trailing_newline() {

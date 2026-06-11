@@ -763,7 +763,7 @@ fn collapse_whitespace(input: &str) -> String {
 #[allow(clippy::panic)]
 mod tests {
     use super::*;
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
     use std::io;
     use std::io::{Read, Write};
     use std::net::TcpListener;

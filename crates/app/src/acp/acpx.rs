@@ -746,7 +746,7 @@ mod tests {
     use super::*;
     use crate::config::{AcpBackendProfilesConfig, AcpConfig, AcpxBackendConfig, LoongConfig};
     #[cfg(unix)]
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
 
     const ACPX_RUNTIME_TEST_TIMEOUT_SECONDS: f64 = 45.0;
 
@@ -1179,7 +1179,7 @@ mod tests {
     #[tokio::test]
     #[cfg(unix)]
     async fn doctor_accepts_fake_version_command() {
-        let _env = crate::test_support::ScopedEnv::new();
+        let _env = crate::test_utils::ScopedEnv::new();
         let temp_dir = unique_temp_dir("loong-acpx-probe");
         let script_path = temp_dir.join("fake-acpx");
         write_executable_script_atomically(&script_path, "#!/bin/sh\necho 'acpx 0.1.16'\n")
@@ -1303,7 +1303,7 @@ mod tests {
     #[allow(clippy::await_holding_lock)]
     async fn runtime_backend_uses_agent_proxy_when_mcp_servers_requested() {
         let _lock = lock_acpx_runtime_tests().await;
-        let _env = crate::test_support::ScopedEnv::new();
+        let _env = crate::test_utils::ScopedEnv::new();
         let temp_dir = unique_temp_dir("loong-acpx-mcp-proxy");
         let log_path = temp_dir.join("calls.log");
         let script_path = write_fake_acpx_script(
@@ -1481,7 +1481,7 @@ exit 0
     #[allow(clippy::await_holding_lock)]
     async fn runtime_backend_executes_session_turn_and_controls() {
         let _lock = lock_acpx_runtime_tests().await;
-        let _env = crate::test_support::ScopedEnv::new();
+        let _env = crate::test_utils::ScopedEnv::new();
         let temp_dir = unique_temp_dir("loong-acpx-runtime");
         let log_path = temp_dir.join("calls.log");
         let script_path = write_fake_acpx_script(
@@ -1669,7 +1669,7 @@ exit 0
     #[allow(clippy::await_holding_lock)]
     async fn runtime_backend_supports_local_abort_for_running_prompt() {
         let _lock = lock_acpx_runtime_tests().await;
-        let _env = crate::test_support::ScopedEnv::new();
+        let _env = crate::test_utils::ScopedEnv::new();
         let temp_dir = unique_temp_dir("loong-acpx-abort");
         let log_path = temp_dir.join("calls.log");
         let script_path = write_fake_acpx_script(
@@ -1773,7 +1773,7 @@ exit 0
     #[allow(clippy::await_holding_lock)]
     async fn ensure_session_falls_back_to_sessions_new_when_ensure_has_no_identifiers() {
         let _lock = lock_acpx_runtime_tests().await;
-        let _env = crate::test_support::ScopedEnv::new();
+        let _env = crate::test_utils::ScopedEnv::new();
         let temp_dir = unique_temp_dir("loong-acpx-fallback");
         let log_path = temp_dir.join("calls.log");
         let script_path = write_fake_acpx_script(

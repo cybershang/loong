@@ -869,7 +869,7 @@ mod tests {
     use crate::channel::ChannelPlatform;
     use crate::config::ProviderConfig;
     use crate::context::{DEFAULT_TOKEN_TTL_S, bootstrap_test_kernel_context};
-    use crate::test_support::{ScopedEnv, unique_temp_dir};
+    use crate::test_utils::{ScopedEnv, unique_temp_dir};
 
     #[derive(Debug, Clone, PartialEq, Eq)]
     struct MockRequest {

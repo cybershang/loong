@@ -89,7 +89,7 @@
     }
 
     struct ScopedHomeFixture {
-        _env: crate::test_support::ScopedEnv,
+        _env: crate::test_utils::ScopedEnv,
         path: PathBuf,
     }
 
@@ -97,7 +97,7 @@
         fn new(prefix: &str) -> Self {
             let path = unique_temp_dir(prefix);
             fs::create_dir_all(&path).expect("create isolated home");
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("HOME", &path);
             Self { _env: env, path }
         }
@@ -1365,7 +1365,7 @@ Safe for model-driven activation.
             );
 
             let config = managed_runtime_config(&root);
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("HOME", &home);
 
             crate::tools::execute_tool_core_with_config(
@@ -1494,7 +1494,7 @@ Safe for model-driven activation.
             );
 
             let config = managed_runtime_config(&root);
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("HOME", &home);
 
             crate::tools::execute_tool_core_with_config(
@@ -1586,7 +1586,7 @@ Safe for model-driven activation.
             )
             .expect("create user skill symlink");
 
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("HOME", &home);
             let list_outcome = crate::tools::execute_tool_core_with_config(
                 ToolCoreRequest {
@@ -1683,7 +1683,7 @@ Safe for model-driven activation.
             );
 
             let config = managed_runtime_config(&root);
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("HOME", &home);
 
             crate::tools::execute_tool_core_with_config(
@@ -1803,7 +1803,7 @@ Safe for model-driven activation.
             );
 
             let config = managed_runtime_config(&root);
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("HOME", &home);
 
             let list_outcome = crate::tools::execute_tool_core_with_config(
@@ -2071,7 +2071,7 @@ Safe for model-driven activation.
             );
             write_file(&root, "fixtures/present.txt", "present");
             let config = managed_runtime_config(&root);
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("DEMO_SKILL_TOKEN", "present");
 
             let list_outcome = crate::tools::execute_tool_core_with_config(
@@ -2205,7 +2205,7 @@ Safe for model-driven activation.
             fs::set_permissions(&command_path, perms).expect("set non-executable permissions");
 
             let config = managed_runtime_config(&root);
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("PATH", root.join("bin").as_os_str());
 
             let list_outcome = crate::tools::execute_tool_core_with_config(
@@ -2248,7 +2248,7 @@ Safe for model-driven activation.
                 "---\nname: broken-skill\ndescription: lower-precedence fallback should stay shadowed.\n---\n\nDo not silently fall back.\n",
             );
             let config = managed_runtime_config(&root);
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("HOME", &home);
 
             crate::tools::execute_tool_core_with_config(
@@ -2556,7 +2556,7 @@ Safe for model-driven activation.
             );
 
             let config = managed_runtime_config(&root);
-            let mut env = crate::test_support::ScopedEnv::new();
+            let mut env = crate::test_utils::ScopedEnv::new();
             env.set("HOME", &home);
 
             crate::tools::execute_tool_core_with_config(

@@ -288,7 +288,7 @@ mod tests {
 
     #[test]
     fn durable_flush_claim_path_is_scoped_to_target_path() {
-        let workspace_root = crate::test_support::unique_temp_dir("durable-flush-claim-scope");
+        let workspace_root = crate::test_utils::unique_temp_dir("durable-flush-claim-scope");
         let target_path = workspace_root.join("memory").join("2026-03-24.md");
         let first_claim_path =
             durable_flush_claim_path(target_path.as_path(), "hash-a").expect("first claim path");
@@ -300,7 +300,7 @@ mod tests {
 
     #[tokio::test]
     async fn try_claim_durable_flush_times_out_when_claim_never_clears() {
-        let workspace_root = crate::test_support::unique_temp_dir("durable-flush-claim-exists");
+        let workspace_root = crate::test_utils::unique_temp_dir("durable-flush-claim-exists");
         let target_path = workspace_root.join("memory").join("2026-03-24.md");
         let content_sha256 = "abc123";
 
@@ -323,7 +323,7 @@ mod tests {
     #[tokio::test]
     async fn try_claim_durable_flush_blocks_parallel_claims_for_same_target() {
         let workspace_root =
-            crate::test_support::unique_temp_dir("durable-flush-claim-parallel-target");
+            crate::test_utils::unique_temp_dir("durable-flush-claim-parallel-target");
         let target_path = workspace_root.join("memory").join("2026-03-24.md");
         let first_claim = try_claim_durable_flush(target_path.as_path(), "hash-a")
             .await

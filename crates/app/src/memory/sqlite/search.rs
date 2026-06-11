@@ -98,7 +98,7 @@ struct WorkspaceMemoryDocumentIndexEntry {
 
 pub(super) fn ensure_workspace_memory_search_storage(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("workspace_memory_search");
+    test_utils::record_sqlite_schema_repair("workspace_memory_search");
 
     conn.execute_batch(
         "
@@ -736,7 +736,7 @@ pub(crate) fn search_workspace_memory_documents(
 
 pub(super) fn ensure_canonical_record_storage(conn: &Connection) -> Result<(), String> {
     #[cfg(test)]
-    test_support::record_sqlite_schema_repair("canonical_records");
+    test_utils::record_sqlite_schema_repair("canonical_records");
 
     conn.execute_batch(
         "

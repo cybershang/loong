@@ -1902,7 +1902,7 @@ fn wecom_status_rejects_non_websocket_endpoint_schemes() {
 
 #[test]
 fn channel_inventory_exposes_grouped_channel_surfaces() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.remove("TELEGRAM_BOT_TOKEN");
 
     let config = LoongConfig::default();
@@ -2485,7 +2485,7 @@ fn matrix_status_requires_user_id_when_ignoring_self_messages() {
 
 #[test]
 fn discord_status_splits_config_backed_send_and_stub_serve() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.remove(DISCORD_BOT_TOKEN_ENV);
     let mut config = LoongConfig::default();
     config.discord.enabled = true;

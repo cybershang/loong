@@ -281,10 +281,10 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn resolve_command_invocation_wraps_shebang_script_with_interpreter() {
-        let root = crate::test_support::unique_temp_dir("loong-process-launch-sh");
+        let root = crate::test_utils::unique_temp_dir("loong-process-launch-sh");
         std::fs::create_dir_all(&root).expect("create temp dir");
         let script_path = root.join("script.sh");
-        crate::test_support::write_executable_script_atomically(
+        crate::test_utils::write_executable_script_atomically(
             &script_path,
             "#!/bin/sh\nexit 0\n",
         )
@@ -316,10 +316,10 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn resolve_command_invocation_supports_env_shebang_arguments() {
-        let root = crate::test_support::unique_temp_dir("loong-process-launch-env");
+        let root = crate::test_utils::unique_temp_dir("loong-process-launch-env");
         std::fs::create_dir_all(&root).expect("create temp dir");
         let script_path = root.join("script.py");
-        crate::test_support::write_executable_script_atomically(
+        crate::test_utils::write_executable_script_atomically(
             &script_path,
             "#!/usr/bin/env python3\nprint('ok')\n",
         )
@@ -343,10 +343,10 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn resolve_command_invocation_preserves_env_split_arguments_as_one_argument() {
-        let root = crate::test_support::unique_temp_dir("loong-process-launch-env-s");
+        let root = crate::test_utils::unique_temp_dir("loong-process-launch-env-s");
         std::fs::create_dir_all(&root).expect("create temp dir");
         let script_path = root.join("script.py");
-        crate::test_support::write_executable_script_atomically(
+        crate::test_utils::write_executable_script_atomically(
             &script_path,
             "#!/usr/bin/env -S python3 -u\nprint('ok')\n",
         )
@@ -370,17 +370,17 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn resolve_command_invocation_uses_resolved_path_for_path_discovered_scripts() {
-        let root = crate::test_support::unique_temp_dir("loong-process-launch-path");
+        let root = crate::test_utils::unique_temp_dir("loong-process-launch-path");
         let bin_dir = root.join("bin");
         let script_path = bin_dir.join("path-script");
         std::fs::create_dir_all(&bin_dir).expect("create bin dir");
-        crate::test_support::write_executable_script_atomically(
+        crate::test_utils::write_executable_script_atomically(
             &script_path,
             "#!/bin/sh\nexit 0\n",
         )
         .expect("write path-discovered script");
 
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         let original_path = std::env::var_os("PATH").unwrap_or_default();
         let mut path_entries = vec![PathBuf::from(&bin_dir)];
         path_entries.extend(std::env::split_paths(Path::new(&original_path)).collect::<Vec<_>>());
@@ -402,7 +402,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn resolve_command_invocation_falls_back_to_stable_search_path_when_env_path_is_empty() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set("PATH", "");
 
         let resolved = resolve_command_invocation("sh", ["-c", "printf ok"]);

@@ -192,7 +192,7 @@ fn resolve_web_search_secret_binding(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
 
     #[test]
     fn from_loong_config_keeps_keyless_duckduckgo_defaults() {

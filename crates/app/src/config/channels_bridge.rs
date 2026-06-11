@@ -1124,7 +1124,7 @@ mod tests {
 
     #[test]
     fn onebot_resolves_websocket_url_from_env_pointer() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set("TEST_ONEBOT_WS_URL", "ws://127.0.0.1:5700");
 
         let config_value = json!({
@@ -1240,7 +1240,7 @@ mod tests {
 
     #[test]
     fn whatsapp_personal_resolves_bridge_url_from_env_pointer() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set(
             "TEST_WHATSAPP_PERSONAL_BRIDGE_URL",
             "http://127.0.0.1:39731/bridge",

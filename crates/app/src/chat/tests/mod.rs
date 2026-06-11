@@ -2,7 +2,7 @@ use super::*;
 use crate::conversation::ConversationRuntimeBinding;
 #[cfg(feature = "memory-sqlite")]
 use crate::session::repository::{NewSessionRecord, SessionKind, SessionRepository, SessionState};
-use crate::test_support::{ScopedEnv, unique_temp_dir};
+use crate::test_utils::{ScopedEnv, unique_temp_dir};
 use serde_json::json;
 use std::ffi::OsStr;
 use std::path::PathBuf;

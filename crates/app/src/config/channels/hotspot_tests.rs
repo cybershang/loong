@@ -15,7 +15,7 @@ fn tlon_partial_deserialization_keeps_default_env_pointers() {
 
 #[test]
 fn tlon_resolves_credentials_from_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("TEST_TLON_SHIP", "~zod");
     env.set("TEST_TLON_URL", "ship.example.test");
     env.set("TEST_TLON_CODE", "lidlut-tabwed-pillex-ridrup");
@@ -96,7 +96,7 @@ fn tlon_multi_account_resolution_merges_base_and_account_overrides() {
 
 #[test]
 fn tlon_account_without_explicit_env_override_inherits_top_level_env_pointers() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.set("TEST_TLON_BASE_SHIP", "~zod");
     env.set("TEST_TLON_BASE_URL", "ship.example.test");
     env.set("TEST_TLON_BASE_CODE", "lidlut-tabwed-pillex-ridrup");

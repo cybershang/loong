@@ -45,7 +45,7 @@ use crate::session::repository::{
 #[cfg(feature = "memory-sqlite")]
 use crate::session::store::SessionStoreConfig;
 #[cfg(feature = "memory-sqlite")]
-use crate::test_support::unique_temp_dir;
+use crate::test_utils::unique_temp_dir;
 
 #[cfg(feature = "memory-sqlite")]
 const DEEP_DELEGATE_REENTRY_TEST_STACK_SIZE_BYTES: usize = 32 * 1024 * 1024;
@@ -2152,8 +2152,8 @@ fn shell_exec_test_command() -> (&'static str, Vec<&'static str>, &'static str) 
 }
 
 #[cfg(all(feature = "memory-sqlite", feature = "tool-shell"))]
-fn shell_exec_test_env() -> crate::test_support::ScopedEnv {
-    let mut env = crate::test_support::ScopedEnv::new();
+fn shell_exec_test_env() -> crate::test_utils::ScopedEnv {
+    let mut env = crate::test_utils::ScopedEnv::new();
 
     #[cfg(unix)]
     env.set("PATH", "/bin:/usr/bin:/usr/local/bin");
@@ -3664,7 +3664,7 @@ async fn default_runtime_build_context_rehydrates_runtime_self_continuity_when_l
     let session_id = unique_acp_test_id("default-runtime-context", "stored-self-fallback");
     let sqlite_path = unique_memory_sqlite_path("stored-self-fallback");
     let empty_workspace_root =
-        crate::test_support::unique_temp_dir("stored-self-fallback-empty-workspace");
+        crate::test_utils::unique_temp_dir("stored-self-fallback-empty-workspace");
     let mut config = test_config();
     let identity_text = "# Identity\n\n- Name: Stored continuity identity";
 
@@ -3729,7 +3729,7 @@ async fn default_runtime_build_context_rehydrates_delegate_child_runtime_self_co
     let child_session_id = unique_acp_test_id("default-runtime-context", "delegate-child");
     let sqlite_path = unique_memory_sqlite_path("delegate-self-fallback");
     let empty_workspace_root =
-        crate::test_support::unique_temp_dir("delegate-self-fallback-empty-workspace");
+        crate::test_utils::unique_temp_dir("delegate-self-fallback-empty-workspace");
     let mut config = test_config();
     let identity_text = "# Identity\n\n- Name: Inherited child identity";
 
@@ -6539,9 +6539,9 @@ async fn handle_turn_with_runtime_compacts_when_token_threshold_reached() {
 #[cfg(feature = "memory-sqlite")]
 #[tokio::test]
 async fn handle_turn_with_runtime_flushes_durable_memory_before_compaction() {
-    let durable_flush_lock = crate::test_support::durable_memory_flush_test_lock();
+    let durable_flush_lock = crate::test_utils::durable_memory_flush_test_lock();
     let _durable_flush_guard = durable_flush_lock.lock().await;
-    let workspace_root = crate::test_support::unique_temp_dir("pre-compaction-durable-flush");
+    let workspace_root = crate::test_utils::unique_temp_dir("pre-compaction-durable-flush");
     std::fs::create_dir_all(&workspace_root).expect("create workspace root");
 
     let db_path = workspace_root.join("memory.sqlite3");
@@ -6660,9 +6660,9 @@ async fn handle_turn_with_runtime_flushes_durable_memory_before_compaction() {
 #[cfg(feature = "memory-sqlite")]
 #[tokio::test]
 async fn handle_turn_with_runtime_does_not_flush_durable_memory_when_compaction_is_skipped() {
-    let durable_flush_lock = crate::test_support::durable_memory_flush_test_lock();
+    let durable_flush_lock = crate::test_utils::durable_memory_flush_test_lock();
     let _durable_flush_guard = durable_flush_lock.lock().await;
-    let workspace_root = crate::test_support::unique_temp_dir("pre-compaction-durable-skip");
+    let workspace_root = crate::test_utils::unique_temp_dir("pre-compaction-durable-skip");
     std::fs::create_dir_all(&workspace_root).expect("create workspace root");
 
     let db_path = workspace_root.join("memory.sqlite3");
@@ -7176,8 +7176,7 @@ async fn handle_turn_with_runtime_tool_turn_uses_natural_language_completion_by_
 #[cfg(feature = "memory-sqlite")]
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn handle_turn_with_runtime_nonterminal_continuation_requests_followup_provider_turn() {
-    let _home =
-        crate::test_support::ScopedLoongHome::new("conversation-continuation-followup-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-continuation-followup-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-continuation-followup", "session-wait")
@@ -7300,8 +7299,7 @@ async fn handle_turn_with_runtime_nonterminal_continuation_requests_followup_pro
 #[cfg(feature = "memory-sqlite")]
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn handle_turn_with_runtime_rejects_done_reply_that_still_requests_more_evidence() {
-    let _home =
-        crate::test_support::ScopedLoongHome::new("conversation-continuation-done-gate-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-continuation-done-gate-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-continuation-done-gate", "session-wait")
@@ -7387,7 +7385,7 @@ async fn handle_turn_with_runtime_rejects_done_reply_that_still_requests_more_ev
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn handle_turn_with_runtime_repairs_done_reply_that_still_requests_more_evidence() {
     let _home =
-        crate::test_support::ScopedLoongHome::new("conversation-continuation-done-repair-home");
+        crate::test_utils::ScopedLoongHome::new("conversation-continuation-done-repair-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-continuation-done-repair", "session-wait")
@@ -9160,8 +9158,8 @@ async fn handle_turn_with_runtime_safe_lane_plan_persists_runtime_events_when_en
 
 #[tokio::test]
 async fn handle_turn_with_runtime_safe_lane_plan_persists_runtime_events_without_toggle() {
-    let mut env = crate::test_support::ScopedEnv::new();
-    let temp_home = crate::test_support::unique_temp_dir("safe-lane-runtime-events-home");
+    let mut env = crate::test_utils::ScopedEnv::new();
+    let temp_home = crate::test_utils::unique_temp_dir("safe-lane-runtime-events-home");
     std::fs::create_dir_all(&temp_home).expect("create safe-lane runtime-events home");
     env.set("HOME", &temp_home);
     env.remove("LOONG_HOME");
@@ -19561,7 +19559,7 @@ async fn session_context_preserves_child_workspace_root_from_delegate_execution_
         "workspace-root-contract",
         "# Identity\n\n- Name: Child workspace identity",
     );
-    let empty_root = crate::test_support::unique_temp_dir("delegate-workspace-root-empty-parent");
+    let empty_root = crate::test_utils::unique_temp_dir("delegate-workspace-root-empty-parent");
     std::fs::create_dir_all(&empty_root).expect("create empty parent root");
 
     let mut config = test_config();
@@ -19657,7 +19655,7 @@ async fn default_runtime_root_session_prefers_runtime_workspace_root_over_file_r
         "root-runtime-workspace-root",
         "# Identity\n\n- Name: Root runtime workspace identity",
     );
-    let fallback_root = crate::test_support::unique_temp_dir("root-runtime-fallback-file-root");
+    let fallback_root = crate::test_utils::unique_temp_dir("root-runtime-fallback-file-root");
     std::fs::create_dir_all(&fallback_root).expect("create fallback file root");
 
     let mut config = test_config();
@@ -19813,7 +19811,7 @@ async fn trait_default_session_context_preserves_delegate_execution_contract() {
         "trait-default-contract",
         "# Identity\n\n- Name: Trait default child workspace",
     );
-    let empty_root = crate::test_support::unique_temp_dir("delegate-trait-default-empty-parent");
+    let empty_root = crate::test_utils::unique_temp_dir("delegate-trait-default-empty-parent");
     std::fs::create_dir_all(&empty_root).expect("create empty parent root");
 
     let runtime_narrowing = sample_delegate_runtime_narrowing();
@@ -20045,7 +20043,7 @@ async fn session_context_merges_persisted_session_policy_runtime_narrowing() {
 #[cfg(feature = "memory-sqlite")]
 #[tokio::test]
 async fn handle_turn_with_runtime_executes_session_tools_via_default_dispatcher() {
-    let _home = crate::test_support::ScopedLoongHome::new("conversation-session-tools-normal-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-session-tools-normal-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-session-tools", "normal-lane")
@@ -20116,7 +20114,7 @@ async fn handle_turn_with_runtime_executes_session_tools_via_default_dispatcher(
 #[cfg(all(feature = "memory-sqlite", feature = "channel-telegram"))]
 #[tokio::test]
 async fn handle_turn_with_runtime_executes_sessions_send_via_default_dispatcher() {
-    let _home = crate::test_support::ScopedLoongHome::new("conversation-sessions-send-normal-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-sessions-send-normal-home");
     let (base_url, request_rx, server) = spawn_telegram_send_server_once();
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
@@ -20241,7 +20239,7 @@ async fn handle_turn_with_runtime_executes_sessions_send_via_default_dispatcher(
 async fn handle_turn_with_runtime_requires_approval_before_delegate_execution() {
     let _announce_lock = delegate_announce_test_lock().lock().await;
     let _home =
-        crate::test_support::ScopedLoongHome::new("conversation-delegate-approval-normal-home");
+        crate::test_utils::ScopedLoongHome::new("conversation-delegate-approval-normal-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-delegate-approval", "normal-lane")
@@ -20359,7 +20357,7 @@ async fn handle_turn_with_runtime_requires_approval_before_delegate_execution() 
 #[tokio::test]
 async fn handle_turn_with_runtime_executes_delegate_via_coordinator() {
     let _announce_lock = delegate_announce_test_lock().lock().await;
-    let _home = crate::test_support::ScopedLoongHome::new("conversation-delegate-normal-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-delegate-normal-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-delegate", "normal-lane")
@@ -20518,7 +20516,7 @@ async fn handle_turn_with_runtime_executes_delegate_via_coordinator() {
 async fn handle_turn_with_runtime_kernel_delegate_calls_subagent_lifecycle_hooks() {
     let _announce_lock = delegate_announce_test_lock().lock().await;
     let _home =
-        crate::test_support::ScopedLoongHome::new("conversation-delegate-kernel-lifecycle-home");
+        crate::test_utils::ScopedLoongHome::new("conversation-delegate-kernel-lifecycle-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-delegate", "kernel-lifecycle")
@@ -20647,7 +20645,7 @@ async fn handle_turn_with_runtime_kernel_delegate_calls_subagent_lifecycle_hooks
 async fn handle_turn_with_runtime_delegate_rejects_spawn_when_prepare_subagent_spawn_fails() {
     let _announce_lock = delegate_announce_test_lock().lock().await;
     let _home =
-        crate::test_support::ScopedLoongHome::new("conversation-delegate-prepare-failure-home");
+        crate::test_utils::ScopedLoongHome::new("conversation-delegate-prepare-failure-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-delegate", "prepare-failure")
@@ -20730,7 +20728,7 @@ async fn handle_turn_with_runtime_delegate_rejects_spawn_when_prepare_subagent_s
 async fn handle_turn_with_runtime_delegate_reports_end_hook_failure_after_child_completion() {
     let _announce_lock = delegate_announce_test_lock().lock().await;
     let _home =
-        crate::test_support::ScopedLoongHome::new("conversation-delegate-end-hook-failure-home");
+        crate::test_utils::ScopedLoongHome::new("conversation-delegate-end-hook-failure-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-delegate", "end-hook-failure")
@@ -24252,7 +24250,7 @@ async fn handle_turn_with_runtime_delegate_child_cannot_reenter_delegate_by_defa
 #[cfg(feature = "memory-sqlite")]
 #[tokio::test]
 async fn handle_turn_with_runtime_delegate_supports_worktree_isolation_for_clean_child() {
-    let repo_root = crate::test_support::unique_temp_dir("delegate-worktree-inline");
+    let repo_root = crate::test_utils::unique_temp_dir("delegate-worktree-inline");
     init_git_repo_for_delegate_test(repo_root.as_path());
     let db_path = repo_root.join("memory.sqlite3");
     let _ = std::fs::remove_file(&db_path);
@@ -24378,7 +24376,7 @@ async fn handle_turn_with_runtime_delegate_supports_worktree_isolation_for_clean
 #[cfg(feature = "memory-sqlite")]
 #[tokio::test]
 async fn handle_turn_with_runtime_delegate_async_worktree_isolation_retains_dirty_child_tree() {
-    let repo_root = crate::test_support::unique_temp_dir("delegate-worktree-async");
+    let repo_root = crate::test_utils::unique_temp_dir("delegate-worktree-async");
     init_git_repo_for_delegate_test(repo_root.as_path());
 
     let db_path = repo_root.join("memory.sqlite3");
@@ -24827,7 +24825,7 @@ async fn handle_turn_with_runtime_delegate_child_can_reenter_when_max_depth_allo
 #[cfg(feature = "memory-sqlite")]
 #[tokio::test]
 async fn handle_turn_with_runtime_executes_session_wait_via_default_dispatcher() {
-    let _home = crate::test_support::ScopedLoongHome::new("conversation-session-wait-normal-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-session-wait-normal-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-session-wait", "normal-lane")
@@ -24918,7 +24916,7 @@ async fn handle_turn_with_runtime_safe_lane_executes_session_tools_via_default_d
     let _env_lock = context_engine_env_lock()
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner());
-    let _home = crate::test_support::ScopedLoongHome::new("conversation-session-tools-safe-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-session-tools-safe-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-session-tools", "safe-lane")
@@ -24993,7 +24991,7 @@ async fn handle_turn_with_runtime_safe_lane_executes_sessions_send_via_default_d
     let _env_lock = context_engine_env_lock()
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner());
-    let _home = crate::test_support::ScopedLoongHome::new("conversation-sessions-send-safe-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-sessions-send-safe-home");
     let (base_url, request_rx, server) = spawn_telegram_send_server_once();
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
@@ -25098,7 +25096,7 @@ async fn handle_turn_with_runtime_safe_lane_executes_session_wait_via_default_di
     let _env_lock = context_engine_env_lock()
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner());
-    let _home = crate::test_support::ScopedLoongHome::new("conversation-session-wait-safe-home");
+    let _home = crate::test_utils::ScopedLoongHome::new("conversation-session-wait-safe-home");
     let db_path = std::env::temp_dir().join(format!(
         "{}.sqlite3",
         unique_acp_test_id("conversation-session-wait", "safe-lane")

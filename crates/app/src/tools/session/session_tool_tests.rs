@@ -20,7 +20,7 @@ use super::{
 };
 
 fn isolated_memory_config(test_name: &str) -> SessionStoreConfig {
-    let base = crate::test_support::unique_temp_dir(&format!("loong-session-tools-{test_name}"));
+    let base = crate::test_utils::unique_temp_dir(&format!("loong-session-tools-{test_name}"));
     fs::create_dir_all(&base).expect("create session tool test root");
     let db_path = base.join("memory.sqlite3");
     SessionStoreConfig {

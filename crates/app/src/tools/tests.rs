@@ -1,7 +1,7 @@
 use super::test_utils::*;
 use super::*;
 use crate::config::ToolConfig;
-use crate::test_support::unique_temp_dir;
+use crate::test_utils::unique_temp_dir;
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use loong_contracts::Capability;

@@ -867,7 +867,7 @@ mod tests {
     };
 
     #[cfg(unix)]
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
 
     #[test]
     fn should_retry_spawn_error_matches_executable_file_busy() {

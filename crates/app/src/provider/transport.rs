@@ -829,7 +829,7 @@ mod tests {
     use super::*;
     use crate::provider::sse::{SseLine, SseStreamEvent, parse_sse_line};
     #[cfg(feature = "provider-bedrock")]
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
     use std::collections::BTreeMap;
 
     #[test]

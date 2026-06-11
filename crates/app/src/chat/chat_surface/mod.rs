@@ -187,7 +187,7 @@ mod tests {
         AltScreenMode, DisableAlternateScroll, EnableAlternateScroll, alt_screen_mode,
         alternate_screen_enabled, env_value_falsey, env_value_truthy, mouse_capture_enabled,
     };
-    use crate::test_support::ScopedEnv;
+    use crate::test_utils::ScopedEnv;
     use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 
     #[test]

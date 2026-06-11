@@ -429,7 +429,7 @@ mod tests {
 
     #[test]
     fn prepare_delegate_workspace_root_creates_detached_worktree_under_repo_worktrees_dir() {
-        let repo_root = crate::test_support::unique_temp_dir("delegate-worktree-create");
+        let repo_root = crate::test_utils::unique_temp_dir("delegate-worktree-create");
         init_git_repo(repo_root.as_path());
         let config = worktree_test_config(repo_root.as_path());
 
@@ -447,7 +447,7 @@ mod tests {
 
     #[test]
     fn cleanup_delegate_workspace_root_removes_clean_worktree_and_retains_dirty_one() {
-        let repo_root = crate::test_support::unique_temp_dir("delegate-worktree-cleanup");
+        let repo_root = crate::test_utils::unique_temp_dir("delegate-worktree-cleanup");
         init_git_repo(repo_root.as_path());
         let config = worktree_test_config(repo_root.as_path());
 

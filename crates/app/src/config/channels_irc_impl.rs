@@ -304,7 +304,7 @@ mod tests {
 
     #[test]
     fn validate_reports_whitespace_in_top_level_irc_nickname() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set("TEST_IRC_NICKNAME", "loong\tclaw");
 
         let config = IrcChannelConfig {
@@ -327,7 +327,7 @@ mod tests {
 
     #[test]
     fn validate_reports_whitespace_in_account_irc_nickname() {
-        let mut env = crate::test_support::ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         env.set("TEST_ACCOUNT_IRC_NICKNAME", "ops\tbot");
 
         let config_value = json!({

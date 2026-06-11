@@ -402,7 +402,7 @@ fn channel_inventory_combines_runtime_and_catalog_surfaces() {
 
 #[test]
 fn channel_inventory_exposes_grouped_channel_surfaces() {
-    let mut env = crate::test_support::ScopedEnv::new();
+    let mut env = crate::test_utils::ScopedEnv::new();
     env.remove("TELEGRAM_BOT_TOKEN");
 
     let config = LoongConfig::default();

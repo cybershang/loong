@@ -2,7 +2,7 @@ use super::*;
 use crate::KernelContext;
 use crate::config::{LoongConfig, ProviderConfig, ReasoningEffort};
 use crate::provider::rate_limit::RateLimitObservation;
-use crate::test_support::ScopedEnv;
+use crate::test_utils::ScopedEnv;
 use loong_contracts::{Capability, ExecutionRoute, HarnessKind, SecretRef};
 use loong_kernel::{
     AuditEventKind, FixedClock, InMemoryAuditSink, LoongKernel, StaticPolicyEngine,

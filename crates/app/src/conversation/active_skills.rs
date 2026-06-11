@@ -195,7 +195,7 @@ fn upsert_active_skill(active_skills: &mut Vec<ActiveSkill>, update: ActiveSkill
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_support::unique_temp_dir;
+    use crate::test_utils::unique_temp_dir;
     use crate::tools::runtime_config::{SkillsRuntimePolicy, ToolRuntimeConfig};
     use std::collections::BTreeSet;
     use std::fs;

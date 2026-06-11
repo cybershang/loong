@@ -156,7 +156,7 @@ async fn run_shell_command_with_timeout(
 #[cfg(all(test, feature = "tool-shell", unix))]
 mod tests {
     use super::*;
-    use crate::test_support::{ScopedEnv, acquire_subprocess_test_guard, unique_temp_dir};
+    use crate::test_utils::{ScopedEnv, acquire_subprocess_test_guard, unique_temp_dir};
     use crate::tools::runtime_config::ToolRuntimeConfig;
     use crate::tools::runtime_events::{
         ToolRuntimeEvent, ToolRuntimeEventSink, ToolRuntimeStream, with_tool_runtime_event_sink,

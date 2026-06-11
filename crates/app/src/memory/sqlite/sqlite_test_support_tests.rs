@@ -18,7 +18,7 @@ struct SqliteRuntimeCacheMissGate {
     released: bool,
 }
 
-fn sqlite_runtime_test_support_lock() -> &'static Mutex<()> {
+fn sqlite_runtime_test_utils_lock() -> &'static Mutex<()> {
     super::sqlite_runtime_test_lock()
 }
 
@@ -429,8 +429,8 @@ fn prompt_window_turn_is_visible_filters_internal_persisted_records() {
 
 #[test]
 fn prompt_window_mixed_overflow_regression() {
-    let runtime_test_support_lock = sqlite_runtime_test_support_lock();
-    let guard_result = runtime_test_support_lock.lock();
+    let runtime_test_utils_lock = sqlite_runtime_test_utils_lock();
+    let guard_result = runtime_test_utils_lock.lock();
     let _guard = match guard_result {
         Ok(guard) => guard,
         Err(poisoned) => poisoned.into_inner(),

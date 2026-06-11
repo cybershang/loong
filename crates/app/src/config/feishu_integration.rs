@@ -264,7 +264,7 @@ fn normalize_scope_alias(raw: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_support::ScopedLoongHome;
+    use crate::test_utils::ScopedLoongHome;
 
     #[test]
     fn feishu_integration_defaults_use_dedicated_runtime_db() {
