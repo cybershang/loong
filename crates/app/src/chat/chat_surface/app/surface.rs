@@ -1,3 +1,5 @@
+use super::*;
+
 impl App {
     pub fn new(
         runtime: &CliTurnRuntime,
@@ -214,7 +216,7 @@ impl App {
         f.render_widget(Paragraph::new(""), *footer_bottom_spacing_area);
     }
 
-    fn refresh_startup_header(&mut self) {
+    pub(super) fn refresh_startup_header(&mut self) {
         let tutorial = self.i18n.text(SurfaceCopy::Tutorial).to_owned();
         let sections = vec![
             (
@@ -243,7 +245,7 @@ impl App {
         );
     }
 
-    fn apply_startup_onboarding_action(
+    pub(super) fn apply_startup_onboarding_action(
         &mut self,
         action: StartupOnboardingAction,
         runtime: &mut CliTurnRuntime,
@@ -304,7 +306,7 @@ impl App {
         }
     }
 
-    fn interstitial_lines_for(
+    pub(super) fn interstitial_lines_for(
         &mut self,
         width: u16,
         height: u16,
@@ -321,7 +323,7 @@ impl App {
             .unwrap_or_default()
     }
 
-    fn apply_palette_action(&mut self, action: CommandAction) -> Option<String> {
+    pub(super) fn apply_palette_action(&mut self, action: CommandAction) -> Option<String> {
         match action {
             CommandAction::RunCommand(_) | CommandAction::SelectResumeSession { .. } => {
                 self.inline_skill_popup_active = false;
@@ -353,7 +355,7 @@ impl App {
         }
     }
 
-    fn handle_mouse_event(&mut self, mouse_event: ChatMouseEvent) -> Option<String> {
+    pub(super) fn handle_mouse_event(&mut self, mouse_event: ChatMouseEvent) -> Option<String> {
         if rect_contains_point(self.last_palette_area, mouse_event.column, mouse_event.row)
             && (matches!(self.focus, Focus::CommandPalette) || self.inline_skill_popup_active)
         {
@@ -394,7 +396,7 @@ impl App {
         None
     }
 
-    fn sync_inline_skill_popup(&mut self) {
+    pub(super) fn sync_inline_skill_popup(&mut self) {
         if !matches!(self.focus, Focus::Composer) {
             self.inline_skill_popup_active = false;
             return;
@@ -410,7 +412,7 @@ impl App {
         }
     }
 
-    fn confirm_inline_skill_popup(&mut self) {
+    pub(super) fn confirm_inline_skill_popup(&mut self) {
         if let Some(action) = self
             .command_palette
             .handle_key(ChatKeyEvent::new(KeyCode::Enter, KeyModifiers::NONE))
@@ -421,7 +423,7 @@ impl App {
         }
     }
 
-    fn handle_inline_skill_popup_key(&mut self, key: ChatKeyEvent) -> bool {
+    pub(super) fn handle_inline_skill_popup_key(&mut self, key: ChatKeyEvent) -> bool {
         if !self.inline_skill_popup_active {
             return false;
         }
