@@ -94,14 +94,8 @@ mod surface;
 use self::commands::*;
 use self::input_palette::*;
 use self::pending::*;
+use self::runtime::refresh_app_cwd_dependent_state;
 pub use self::runtime::run_app;
-use self::runtime::{
-    LoongTerminalActivity, app_terminal_title_activity, app_terminal_title_requires_attention,
-    build_loong_terminal_title, clear_app_terminal_title, compact_path_label,
-    current_pending_approval_count, refresh_app_cwd, refresh_app_cwd_dependent_state,
-    sanitize_terminal_title, sync_app_terminal_title, terminal_title_braille_frame,
-    write_terminal_title,
-};
 use self::session_router::*;
 use self::startup::*;
 use self::startup_catalog::*;
@@ -111,10 +105,8 @@ use self::state::{
     StartupChannelFollowUpDescriptor, StartupOnboardingAction, StartupOnboardingInteractionKind,
     StartupOnboardingStage, StartupOnboardingState, StartupPersonalizationPreset,
     StartupProviderAuthBindingKind, StartupProviderOption, StartupSetupPathChoice,
-    StartupSkillOption, apply_startup_auth_binding, detected_startup_auth_binding,
-    startup_provider_config_for_kind,
+    detected_startup_auth_binding, startup_provider_config_for_kind,
 };
-use self::surface::*;
 
 mod resume_candidates;
 #[cfg(test)]
