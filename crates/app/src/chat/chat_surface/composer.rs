@@ -306,12 +306,7 @@ fn display_width(grapheme: &str) -> usize {
 }
 
 fn composer_max_height_for_terminal(terminal_height: u16) -> u16 {
-    let proportional = terminal_height.saturating_div(4).clamp(3, 14);
-    if terminal_height < 16 {
-        proportional.min(4)
-    } else {
-        proportional
-    }
+    (terminal_height / 4).clamp(3, 14)
 }
 
 fn wrapped_height(text: &str, width: u16) -> u16 {
