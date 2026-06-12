@@ -9,25 +9,19 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
-#[cfg(feature = "tool-shell")]
 use std::time::Instant;
 
 use loong_contracts::{ToolCoreOutcome, ToolCoreRequest};
-#[cfg(feature = "tool-shell")]
 use serde_json::Value;
 
-#[cfg(feature = "tool-shell")]
 use super::process_exec;
 use super::runtime_config::BashExecRuntimePolicy;
-#[cfg(feature = "tool-shell")]
 use super::runtime_events::current_tool_runtime_event_sink;
-#[cfg(feature = "tool-shell")]
 use governance::{FinalGovernanceDecision, evaluate_bash_command};
 
 const BASH_UNAVAILABLE_WARNING: &str =
     "bash unavailable; hiding bash.exec from runtime tool surface";
 const BASH_RUNTIME_PROBE_TIMEOUT: Duration = Duration::from_secs(1);
-#[cfg(feature = "tool-shell")]
 const BASH_EXEC_ALLOWED_FIELDS: &[&str] = &[
     "command",
     "cwd",
@@ -95,85 +89,75 @@ pub(super) fn execute_bash_tool_with_config(
     request: ToolCoreRequest,
     config: &super::runtime_config::ToolRuntimeConfig,
 ) -> Result<ToolCoreOutcome, String> {
-    #[cfg(not(feature = "tool-shell"))]
-    {
-        let _ = (request, config);
-        return Err("bash tool is disabled in this build (enable feature `tool-shell`)".to_owned());
+    let payload = request
+        .payload
+        .as_object()
+        .ok_or_else(|| "bash.exec payload must be an object".to_owned())?;
+    reject_unknown_bash_exec_fields(payload)?;
+    let command = payload
+        .get("command")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| "bash.exec requires payload.command".to_owned())?;
+    let cwd = parse_bash_cwd(payload, config)?;
+    let timeout_ms = parse_bash_timeout_ms(payload)?;
+
+    if !config.bash_exec.is_runtime_ready() {
+        return Err("bash unavailable".to_owned());
     }
 
-    #[cfg(feature = "tool-shell")]
-    {
-        let payload = request
-            .payload
-            .as_object()
-            .ok_or_else(|| "bash.exec payload must be an object".to_owned())?;
-        reject_unknown_bash_exec_fields(payload)?;
-        let command = payload
-            .get("command")
-            .and_then(Value::as_str)
-            .map(str::trim)
-            .filter(|value| !value.is_empty())
-            .ok_or_else(|| "bash.exec requires payload.command".to_owned())?;
-        let cwd = parse_bash_cwd(payload, config)?;
-        let timeout_ms = parse_bash_timeout_ms(payload)?;
+    let runtime = &config.bash_exec;
+    if let Some(load_error) = runtime.governance.load_error.as_deref() {
+        return Err(format!(
+            "policy_denied: bash governance rules failed to load: {load_error}"
+        ));
+    }
 
-        if !config.bash_exec.is_runtime_ready() {
-            return Err("bash unavailable".to_owned());
-        }
+    let governance = evaluate_bash_command(
+        command,
+        &runtime.governance.rules,
+        config.shell_default_mode,
+    );
+    if governance.final_decision == FinalGovernanceDecision::Deny {
+        let detail = governance
+            .denial_reason()
+            .unwrap_or_else(|| "bash governance denied command".to_owned());
+        return Err(format!("policy_denied: {detail}"));
+    }
 
-        let runtime = &config.bash_exec;
-        if let Some(load_error) = runtime.governance.load_error.as_deref() {
-            return Err(format!(
-                "policy_denied: bash governance rules failed to load: {load_error}"
-            ));
-        }
-
-        let governance = evaluate_bash_command(
-            command,
-            &runtime.governance.rules,
-            config.shell_default_mode,
-        );
-        if governance.final_decision == FinalGovernanceDecision::Deny {
-            let detail = governance
-                .denial_reason()
-                .unwrap_or_else(|| "bash governance denied command".to_owned());
-            return Err(format!("policy_denied: {detail}"));
-        }
-
-        let runtime_command = runtime
-            .command
-            .as_deref()
-            .ok_or_else(|| "bash unavailable".to_owned())?;
-        let args = bash_exec_args(command, runtime.login_shell);
-        let resolved_invocation = crate::process_launch::resolve_command_invocation(
-            runtime_command.to_string_lossy().as_ref(),
-            args.iter().map(String::as_str),
-        );
-        let runtime_event_sink = current_tool_runtime_event_sink();
-        let output = process_exec::run_tool_async(
-            process_exec::run_process_with_timeout_with_sink(
-                resolved_invocation.program.as_os_str(),
-                resolved_invocation.args.as_slice(),
-                cwd.as_path(),
-                timeout_ms,
-                "bash command",
-                runtime_event_sink.clone(),
-                config.file_root.as_deref(),
-            ),
-            "bash tool",
-        )??;
-
-        Ok(process_exec::build_process_tool_outcome(
-            request.tool_name.as_str(),
-            command,
-            None,
+    let runtime_command = runtime
+        .command
+        .as_deref()
+        .ok_or_else(|| "bash unavailable".to_owned())?;
+    let args = bash_exec_args(command, runtime.login_shell);
+    let resolved_invocation = crate::process_launch::resolve_command_invocation(
+        runtime_command.to_string_lossy().as_ref(),
+        args.iter().map(String::as_str),
+    );
+    let runtime_event_sink = current_tool_runtime_event_sink();
+    let output = process_exec::run_tool_async(
+        process_exec::run_process_with_timeout_with_sink(
+            resolved_invocation.program.as_os_str(),
+            resolved_invocation.args.as_slice(),
             cwd.as_path(),
-            output,
-        ))
-    }
+            timeout_ms,
+            "bash command",
+            runtime_event_sink.clone(),
+            config.file_root.as_deref(),
+        ),
+        "bash tool",
+    )??;
+
+    Ok(process_exec::build_process_tool_outcome(
+        request.tool_name.as_str(),
+        command,
+        None,
+        cwd.as_path(),
+        output,
+    ))
 }
 
-#[cfg(feature = "tool-shell")]
 fn reject_unknown_bash_exec_fields(payload: &serde_json::Map<String, Value>) -> Result<(), String> {
     let mut unknown_fields = payload
         .keys()
@@ -192,7 +176,6 @@ fn reject_unknown_bash_exec_fields(payload: &serde_json::Map<String, Value>) -> 
     ))
 }
 
-#[cfg(feature = "tool-shell")]
 fn parse_bash_cwd(
     payload: &serde_json::Map<String, Value>,
     config: &super::runtime_config::ToolRuntimeConfig,
@@ -200,7 +183,6 @@ fn parse_bash_cwd(
     process_exec::resolve_process_cwd_with_config(payload, config, "bash.exec")
 }
 
-#[cfg(feature = "tool-shell")]
 fn parse_bash_timeout_ms(payload: &serde_json::Map<String, Value>) -> Result<u64, String> {
     let timeout_ms = match payload.get("timeout_ms") {
         Some(timeout_ms) => timeout_ms
@@ -353,7 +335,6 @@ mod tests {
         assert_eq!(args, vec!["-lc".to_owned(), "echo hi".to_owned()]);
     }
 
-    #[cfg(feature = "tool-shell")]
     #[test]
     fn execute_bash_tool_with_config_reports_unavailable_runtime() {
         let config = ToolRuntimeConfig::default();
@@ -372,7 +353,6 @@ mod tests {
         assert!(error.contains("bash unavailable"));
     }
 
-    #[cfg(feature = "tool-shell")]
     #[test]
     fn execute_bash_tool_with_config_rejects_non_string_cwd() {
         let config = ToolRuntimeConfig::default();
@@ -390,7 +370,6 @@ mod tests {
         assert!(error.contains("bash.exec payload.cwd must be a string"));
     }
 
-    #[cfg(feature = "tool-shell")]
     #[test]
     fn execute_bash_tool_with_config_rejects_unknown_fields() {
         let config = ToolRuntimeConfig::default();
@@ -408,7 +387,6 @@ mod tests {
         assert!(error.contains("bash.exec payload contains unknown field(s): extra"));
     }
 
-    #[cfg(feature = "tool-shell")]
     #[test]
     fn execute_bash_tool_with_config_allows_trusted_internal_context_field() {
         let config = ToolRuntimeConfig::default();
@@ -430,7 +408,6 @@ mod tests {
         assert!(error.contains("bash unavailable"));
     }
 
-    #[cfg(feature = "tool-shell")]
     #[test]
     fn execute_bash_tool_with_config_emits_runtime_output_delta_and_single_metrics_event() {
         let bash_runtime = detect_bash_runtime_policy();
@@ -513,7 +490,6 @@ mod tests {
         assert!(error.contains("bash tool is disabled in this build"));
     }
 
-    #[cfg(feature = "tool-shell")]
     #[test]
     fn parse_bash_timeout_ms_clamps_to_1000ms_floor() {
         let payload = json!({

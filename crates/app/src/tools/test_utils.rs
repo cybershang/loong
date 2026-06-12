@@ -1,10 +1,11 @@
 use super::*;
 use crate::test_utils::*;
 use std::ops::{Deref, DerefMut};
-use std::path::{Path, PathBuf};
 
+#[cfg(feature = "tool-shell")]
 pub fn ready_bash_exec_runtime_policy() -> runtime_config::BashExecRuntimePolicy {
-    let resolved_bash = which::which("bash").unwrap_or_else(|_| PathBuf::from("/bin/bash"));
+    let resolved_bash =
+        which::which("bash").unwrap_or_else(|_| std::path::PathBuf::from("/bin/bash"));
     runtime_config::BashExecRuntimePolicy {
         available: true,
         command: Some(resolved_bash),
@@ -14,8 +15,8 @@ pub fn ready_bash_exec_runtime_policy() -> runtime_config::BashExecRuntimePolicy
 
 #[cfg(all(feature = "tool-shell", unix))]
 pub fn configured_test_bash_runtime_with_rules(
-    root: &Path,
-) -> (runtime_config::BashExecRuntimePolicy, PathBuf) {
+    root: &std::path::Path,
+) -> (runtime_config::BashExecRuntimePolicy, std::path::PathBuf) {
     let log_path = root.join("bash-args.log");
     let runtime_path = write_fake_bash_runtime(root, "fake-bash", &log_path);
     let rules_dir = root.join(crate::config::HOME_DIR_NAME).join("rules");
@@ -37,7 +38,11 @@ pub fn configured_test_bash_runtime_with_rules(
 }
 
 #[cfg(all(feature = "tool-shell", unix))]
-pub fn write_fake_bash_runtime(root: &Path, name: &str, log_path: &Path) -> PathBuf {
+pub fn write_fake_bash_runtime(
+    root: &std::path::Path,
+    name: &str,
+    log_path: &std::path::Path,
+) -> std::path::PathBuf {
     let path = root.join(name);
     let script = format!(
         "#!/bin/sh\nLOG_PATH=\"{}\"\n: > \"$LOG_PATH\"\nfor arg in \"$@\"; do\n  printf '%s\\n' \"$arg\" >> \"$LOG_PATH\"\ndone\nMODE=\"${{1:-}}\"\nCOMMAND=\"${{2:-}}\"\ncase \"$MODE\" in\n  -c|-lc)\n    exec /bin/sh -c \"$COMMAND\"\n    ;;\n  *)\n    printf 'unexpected bash args: %s' \"$*\" >&2\n    exit 97\n    ;;\nesac\n",
@@ -88,7 +93,7 @@ impl ToolTestRuntimeConfig {
     }
 }
 
-pub fn test_tool_runtime_config(root: impl AsRef<Path>) -> ToolTestRuntimeConfig {
+pub fn test_tool_runtime_config(root: impl AsRef<std::path::Path>) -> ToolTestRuntimeConfig {
     let runtime_home = ScopedLoongHome::new("loong-tool-runtime-home");
     let config = runtime_config::ToolRuntimeConfig {
         shell_allow: BTreeSet::from(["echo".to_owned(), "cat".to_owned(), "ls".to_owned()]),

@@ -241,6 +241,7 @@ pub(super) fn tool_search_entry_is_runtime_usable(
                     crate::tools::shell_policy_ext::ShellPolicyDefault::Allow
                 )
         }
+        #[cfg(feature = "tool-shell")]
         "bash.exec" => config.bash_exec.is_discoverable(),
         #[cfg(feature = "tool-file")]
         "memory.retrieve" | "memory_search" => memory_tools::memory_corpus_available(config),

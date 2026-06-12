@@ -3,10 +3,10 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
-use loong_contracts::{ExecutionSecurityTier, SecretRef};
-use serde::{Deserialize, Serialize};
+#[cfg(feature = "tool-shell")]
+use super::bash;
+use super::shell_policy_ext::ShellPolicyDefault;
 
-use super::{bash, shell_policy_ext::ShellPolicyDefault};
 use crate::config::{AutonomyProfile, LoongConfig};
 #[cfg(feature = "feishu-integration")]
 use crate::config::{FeishuChannelConfig, FeishuIntegrationConfig};
@@ -16,6 +16,8 @@ use crate::conversation::{
 };
 #[cfg(feature = "feishu-integration")]
 use crate::secrets::has_configured_secret_ref;
+use loong_contracts::{ExecutionSecurityTier, SecretRef};
+use serde::{Deserialize, Serialize};
 
 #[path = "runtime_config_narrowing.rs"]
 mod runtime_narrowing;
@@ -84,6 +86,7 @@ impl BrowserRuntimePolicy {
     }
 }
 
+#[cfg(feature = "tool-shell")]
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct BashGovernanceRuntimePolicy {
     pub rules_dir: PathBuf,
@@ -91,6 +94,7 @@ pub struct BashGovernanceRuntimePolicy {
     pub load_error: Option<String>,
 }
 
+#[cfg(feature = "tool-shell")]
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct BashExecRuntimePolicy {
     pub available: bool,
@@ -100,6 +104,7 @@ pub struct BashExecRuntimePolicy {
     pub governance: BashGovernanceRuntimePolicy,
 }
 
+#[cfg(feature = "tool-shell")]
 impl BashExecRuntimePolicy {
     #[must_use]
     pub fn is_runtime_ready(&self) -> bool {
@@ -133,6 +138,7 @@ fn emit_bash_runtime_warning_once(warning: &str) {
     BASH_RUNTIME_WARNING.get_or_init(|| emit_runtime_warning(warning));
 }
 
+#[cfg(feature = "tool-shell")]
 fn translate_legacy_shell_rules<'a>(
     source: &str,
     decision: bash::rules::PrefixRuleDecision,
@@ -156,6 +162,7 @@ fn translate_legacy_shell_rules<'a>(
         .collect()
 }
 
+#[cfg(feature = "tool-shell")]
 fn build_bash_governance_runtime_policy<'a>(
     rules_dir: PathBuf,
     shell_allow: impl IntoIterator<Item = &'a String>,
@@ -187,6 +194,7 @@ fn build_bash_governance_runtime_policy<'a>(
     }
 }
 
+#[cfg(feature = "tool-shell")]
 fn build_bash_exec_runtime_policy(
     login_shell: bool,
     governance: BashGovernanceRuntimePolicy,
@@ -449,6 +457,7 @@ pub struct ToolRuntimeConfig {
     pub delegate_enabled: bool,
     pub runtime_self: RuntimeSelfRuntimePolicy,
     pub browser: BrowserRuntimePolicy,
+    #[cfg(feature = "tool-shell")]
     pub bash_exec: BashExecRuntimePolicy,
     pub web_fetch: WebFetchRuntimePolicy,
     pub web_search: WebSearchRuntimePolicy,
@@ -479,6 +488,7 @@ impl Default for ToolRuntimeConfig {
             delegate_enabled: true,
             runtime_self: RuntimeSelfRuntimePolicy::default(),
             browser: BrowserRuntimePolicy::default(),
+            #[cfg(feature = "tool-shell")]
             bash_exec: BashExecRuntimePolicy::default(),
             web_fetch: WebFetchRuntimePolicy::default(),
             web_search: WebSearchRuntimePolicy::default(),
@@ -556,6 +566,7 @@ impl ToolRuntimeConfig {
             .iter()
             .map(|value| value.to_ascii_lowercase())
             .collect();
+        #[cfg(feature = "tool-shell")]
         let bash_governance = build_bash_governance_runtime_policy(
             config.tools.bash.resolved_rules_dir(),
             shell_allow.iter(),
@@ -584,6 +595,7 @@ impl ToolRuntimeConfig {
                 max_links: config.tools.browser.max_links,
                 max_text_chars: config.tools.browser.max_text_chars,
             },
+            #[cfg(feature = "tool-shell")]
             bash_exec: build_bash_exec_runtime_policy(
                 config.tools.bash.login_shell,
                 bash_governance,
@@ -715,6 +727,7 @@ impl ToolRuntimeConfig {
             default_timeout_seconds: tool_execution_default_timeout,
             per_tool_timeout: tool_execution_per_tool_timeout,
         };
+        #[cfg(feature = "tool-shell")]
         let bash_exec = build_bash_exec_runtime_policy(
             false,
             build_bash_governance_runtime_policy(
@@ -746,6 +759,7 @@ impl ToolRuntimeConfig {
                 max_links: browser_max_links,
                 max_text_chars: browser_max_text_chars,
             },
+            #[cfg(feature = "tool-shell")]
             bash_exec,
             web_fetch: WebFetchRuntimePolicy {
                 enabled: web_fetch_enabled,
@@ -1407,6 +1421,7 @@ mod tests {
         assert_eq!(snapshot.budget.max_topology_mutations_per_turn, 1);
     }
 
+    #[cfg(feature = "tool-shell")]
     #[test]
     fn tool_runtime_config_default_marks_bash_exec_unavailable() {
         let config = ToolRuntimeConfig::default();
@@ -1418,6 +1433,7 @@ mod tests {
         assert!(!config.bash_exec.login_shell);
     }
 
+    #[cfg(feature = "tool-shell")]
     #[test]
     fn bash_exec_discoverability_requires_runtime_ready_and_governance_load_success() {
         let unavailable = BashExecRuntimePolicy::default();
@@ -1443,6 +1459,7 @@ mod tests {
         assert!(!governance_failed.is_discoverable());
     }
 
+    #[cfg(feature = "tool-shell")]
     #[test]
     fn tool_runtime_config_projects_bash_login_shell_flag() {
         let config: crate::config::ToolConfig =
@@ -1457,6 +1474,7 @@ mod tests {
         assert!(runtime.bash_exec.login_shell);
     }
 
+    #[cfg(feature = "tool-shell")]
     #[test]
     fn tool_runtime_config_uses_loong_home_rules_dir_when_unset() {
         let home = ScopedLoongHome::new("loong-runtime-config-home");
@@ -1472,6 +1490,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "tool-shell")]
     #[test]
     fn tool_runtime_config_keeps_relative_bash_rules_dir_override_relative() {
         let config: crate::config::ToolConfig =
@@ -1492,6 +1511,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "tool-shell")]
     #[test]
     fn bash_governance_runtime_treats_missing_rules_dir_as_empty_rule_set() {
         let home = ScopedLoongHome::new("loong-runtime-governance-home");
@@ -1506,6 +1526,7 @@ mod tests {
         assert!(runtime.bash_exec.governance.rules.is_empty());
     }
 
+    #[cfg(feature = "tool-shell")]
     #[test]
     fn bash_governance_runtime_preserves_rule_load_error_for_broken_rule_file() {
         let home = ScopedLoongHome::new("loong-runtime-governance-broken-home");
@@ -1521,31 +1542,6 @@ mod tests {
         );
 
         assert!(runtime.bash_exec.governance.load_error.is_some());
-    }
-
-    #[cfg(not(feature = "tool-shell"))]
-    #[test]
-    fn tool_runtime_config_from_loong_config_does_not_probe_bash_when_tool_shell_disabled() {
-        let mut config = crate::config::LoongConfig::default();
-        config.tools.bash.login_shell = true;
-
-        let runtime = ToolRuntimeConfig::from_loong_config(&config, None);
-
-        assert!(!runtime.bash_exec.available);
-        assert!(runtime.bash_exec.command.is_none());
-        assert!(runtime.bash_exec.warning.is_none());
-        assert!(runtime.bash_exec.login_shell);
-    }
-
-    #[cfg(not(feature = "tool-shell"))]
-    #[test]
-    fn tool_runtime_config_from_env_does_not_probe_bash_when_tool_shell_disabled() {
-        let runtime = ToolRuntimeConfig::from_env();
-
-        assert!(!runtime.bash_exec.available);
-        assert!(runtime.bash_exec.command.is_none());
-        assert!(runtime.bash_exec.warning.is_none());
-        assert!(!runtime.bash_exec.login_shell);
     }
 
     #[test]

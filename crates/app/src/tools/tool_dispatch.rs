@@ -333,6 +333,7 @@ fn dispatch_tool_request(
         #[cfg(feature = "tool-http")]
         "http.request" => http_request::execute_http_request_tool_with_config(request, config),
         "shell.exec" => shell::execute_shell_tool_with_config(request, config),
+        #[cfg(feature = "tool-shell")]
         "bash.exec" => bash::execute_bash_tool_with_config(request, config),
         "read" => file::execute_file_read_tool_with_config(request, config),
         "write" => file::execute_file_write_tool_with_config(request, config),

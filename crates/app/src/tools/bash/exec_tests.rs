@@ -21,10 +21,9 @@ fn execute_tool_core_with_trusted_subprocess_test_context(
     execute_tool_core_with_test_context(request, config)
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn runtime_tool_view_hides_bash_exec_when_runtime_is_unavailable() {
-    let root = crate::test_utils::unique_temp_dir("loong-bash-tool-view-hidden");
+    let root = unique_temp_dir("loong-bash-tool-view-hidden");
     std::fs::create_dir_all(&root).expect("create root dir");
 
     let config = test_tool_runtime_config(root);
@@ -33,7 +32,6 @@ fn runtime_tool_view_hides_bash_exec_when_runtime_is_unavailable() {
     assert!(!tool_view.contains("bash.exec"));
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn runtime_tool_view_includes_bash_exec_when_runtime_is_available() {
     let root = unique_temp_dir("loong-bash-tool-view-visible");
@@ -46,7 +44,6 @@ fn runtime_tool_view_includes_bash_exec_when_runtime_is_available() {
     assert!(tool_view.contains("bash.exec"));
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_hides_bash_exec_when_runtime_is_unavailable() {
     let root = unique_temp_dir("loong-bash-tool-search-hidden");
@@ -69,7 +66,6 @@ fn tool_search_hides_bash_exec_when_runtime_is_unavailable() {
     assert!(results.iter().all(|entry| entry["tool_id"] != "bash.exec"));
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_hides_bash_exec_when_governance_rules_failed_to_load() {
     let root = unique_temp_dir("loong-bash-tool-search-broken-rules");
@@ -97,7 +93,6 @@ fn tool_search_hides_bash_exec_when_governance_rules_failed_to_load() {
     );
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_routes_bash_capabilities_to_exec_when_runtime_is_available() {
     use super::super::execute_tool_core_with_config;
@@ -128,7 +123,6 @@ fn tool_search_routes_bash_capabilities_to_exec_when_runtime_is_available() {
     assert!(exec_entry.get("lease").is_none());
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn tool_search_exact_bash_query_surfaces_bash() {
     let root = unique_temp_dir("loong-bash-tool-search-exact-query");
@@ -155,7 +149,6 @@ fn tool_search_exact_bash_query_surfaces_bash() {
     );
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn bash_exec_catalog_exposes_command_cwd_and_timeout_ms() {
     use crate::tools::catalog;
@@ -208,7 +201,6 @@ fn framework_timeout_treats_bash_exec_as_dedicated_timeout_tool() {
     assert!(tool_uses_dedicated_timeout("bash.exec"));
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn bash_exec_rejects_blank_command() {
     let config = test_tool_runtime_config(std::env::temp_dir());
@@ -227,7 +219,6 @@ fn bash_exec_rejects_blank_command() {
     );
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn bash_exec_returns_runtime_unavailable_error_when_no_bash_is_configured() {
     let config = test_tool_runtime_config(std::env::temp_dir());
@@ -246,7 +237,6 @@ fn bash_exec_returns_runtime_unavailable_error_when_no_bash_is_configured() {
     );
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn bash_exec_fails_closed_when_rule_loading_failed() {
     let mut config = test_tool_runtime_config(std::env::temp_dir());
@@ -265,7 +255,7 @@ fn bash_exec_fails_closed_when_rule_loading_failed() {
     assert!(error.contains("broken rules"));
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_reports_failed_status_for_non_zero_exit() {
     let mut config = test_tool_runtime_config(std::env::temp_dir());
@@ -300,7 +290,6 @@ fn bash_exec_reports_failed_status_for_non_zero_exit() {
     );
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn bash_exec_runtime_policy_defaults_to_non_login_shell() {
     let config = test_tool_runtime_config(std::env::temp_dir());
@@ -308,12 +297,12 @@ fn bash_exec_runtime_policy_defaults_to_non_login_shell() {
     assert!(!config.bash_exec.login_shell);
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_runs_command_string_via_bash_runtime() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-bash-exec-command");
+    let root = unique_temp_dir("loong-bash-exec-command");
     fs::create_dir_all(&root).expect("create fixture root");
     let log_path = root.join("bash-args.log");
     let runtime_path = write_fake_bash_runtime(&root, "fake-bash", &log_path);
@@ -348,12 +337,12 @@ fn bash_exec_runs_command_string_via_bash_runtime() {
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_falls_back_to_file_root_when_current_dir_is_unavailable() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-bash-exec-missing-cwd");
+    let root = unique_temp_dir("loong-bash-exec-missing-cwd");
     let deleted_cwd = root.join("deleted-cwd");
     let fallback_root = root.join("fallback-root");
     fs::create_dir_all(&deleted_cwd).expect("create deleted cwd");
@@ -400,16 +389,16 @@ fn bash_exec_falls_back_to_file_root_when_current_dir_is_unavailable() {
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 const BASH_EMPTY_PATH_PROBE_ENV: &str = "LOONG_BASH_EMPTY_PATH_PROBE";
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_succeeds_when_path_is_empty_but_stable_search_path_can_find_runtime() {
     let _subprocess_guard = crate::test_utils::acquire_subprocess_test_guard();
     let output = std::process::Command::new(std::env::current_exe().expect("current test binary"))
         .arg("--exact")
-        .arg("tools::tests::bash_exec_tests::bash_exec_empty_path_probe")
+        .arg("tools::bash::exec_tests::bash_exec_empty_path_probe")
         .arg("--nocapture")
         .env(BASH_EMPTY_PATH_PROBE_ENV, "1")
         .output()
@@ -423,7 +412,7 @@ fn bash_exec_succeeds_when_path_is_empty_but_stable_search_path_can_find_runtime
     );
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_empty_path_probe() {
     use std::fs;
@@ -432,7 +421,7 @@ fn bash_exec_empty_path_probe() {
         return;
     }
 
-    let root = unique_tool_temp_dir("loong-bash-empty-path-fallback");
+    let root = unique_temp_dir("loong-bash-empty-path-fallback");
     fs::create_dir_all(&root).expect("create fixture root");
 
     let mut env = ScopedEnv::new();
@@ -464,13 +453,13 @@ fn bash_exec_empty_path_probe() {
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_defaults_cwd_to_configured_file_root() {
     use std::fs;
     use std::path::Path;
 
-    let root = unique_tool_temp_dir("loong-bash-default-cwd");
+    let root = unique_temp_dir("loong-bash-default-cwd");
     fs::create_dir_all(&root).expect("create root");
 
     let mut config = test_tool_runtime_config(root.clone());
@@ -501,12 +490,12 @@ fn bash_exec_defaults_cwd_to_configured_file_root() {
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_allows_plain_command_when_prefix_rule_allows() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-bash-governance-allow");
+    let root = unique_temp_dir("loong-bash-governance-allow");
     let rules_dir = root.join(crate::config::HOME_DIR_NAME).join("rules");
     fs::create_dir_all(&rules_dir).expect("rules dir");
     fs::write(
@@ -534,13 +523,13 @@ fn bash_exec_allows_plain_command_when_prefix_rule_allows() {
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_uses_loong_home_rules_dir_even_when_runtime_is_built_without_config_path() {
     use std::fs;
 
     let home = crate::test_utils::ScopedLoongHome::new("loong-bash-home-rules");
-    let workspace = unique_tool_temp_dir("loong-bash-home-rules-workspace");
+    let workspace = unique_temp_dir("loong-bash-home-rules-workspace");
     let rules_dir = home.path().join("rules");
     fs::create_dir_all(&rules_dir).expect("rules dir");
     fs::write(
@@ -588,12 +577,12 @@ fn bash_exec_uses_loong_home_rules_dir_even_when_runtime_is_built_without_config
     fs::remove_dir_all(&workspace).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_denies_plain_command_when_prefix_rule_denies() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-bash-governance-deny");
+    let root = unique_temp_dir("loong-bash-governance-deny");
     let rules_dir = root.join(crate::config::HOME_DIR_NAME).join("rules");
     fs::create_dir_all(&rules_dir).expect("rules dir");
     fs::write(
@@ -625,12 +614,12 @@ fn bash_exec_denies_plain_command_when_prefix_rule_denies() {
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_denies_escaped_static_command_name_when_deny_rule_matches_under_default_allow() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-bash-governance-escaped-deny");
+    let root = unique_temp_dir("loong-bash-governance-escaped-deny");
     let rules_dir = root.join(crate::config::HOME_DIR_NAME).join("rules");
     fs::create_dir_all(&rules_dir).expect("rules dir");
     fs::write(
@@ -663,12 +652,12 @@ fn bash_exec_denies_escaped_static_command_name_when_deny_rule_matches_under_def
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_denies_or_list_when_rhs_branch_matches_deny_rule() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-bash-governance-or-deny");
+    let root = unique_temp_dir("loong-bash-governance-or-deny");
     let rules_dir = root.join(crate::config::HOME_DIR_NAME).join("rules");
     fs::create_dir_all(&rules_dir).expect("rules dir");
     fs::write(
@@ -703,12 +692,12 @@ fn bash_exec_denies_or_list_when_rhs_branch_matches_deny_rule() {
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_allows_parse_unreliable_command_when_shell_default_mode_is_allow() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-bash-governance-default-allow");
+    let root = unique_temp_dir("loong-bash-governance-default-allow");
     fs::create_dir_all(&root).expect("fixture root");
 
     let mut config = test_tool_runtime_config(root.clone());
@@ -730,7 +719,6 @@ fn bash_exec_allows_parse_unreliable_command_when_shell_default_mode_is_allow() 
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(feature = "tool-shell")]
 #[test]
 fn bash_exec_keeps_shell_exec_unchanged() {
     let config = test_tool_runtime_config(std::env::temp_dir());
@@ -747,13 +735,13 @@ fn bash_exec_keeps_shell_exec_unchanged() {
     assert_eq!(outcome.payload["stdout"].as_str(), Some("hi"));
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_honors_cwd() {
     use std::fs;
     use std::path::Path;
 
-    let root = unique_tool_temp_dir("loong-bash-exec-cwd");
+    let root = unique_temp_dir("loong-bash-exec-cwd");
     let nested = root.join("nested");
     let requested_cwd = "nested";
     fs::create_dir_all(&nested).expect("create nested dir");
@@ -786,13 +774,13 @@ fn bash_exec_honors_cwd() {
     fs::remove_dir_all(&root).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_rejects_cwd_that_escapes_configured_file_root() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-bash-cwd-root");
-    let outside = unique_tool_temp_dir("loong-bash-cwd-outside");
+    let root = unique_temp_dir("loong-bash-cwd-root");
+    let outside = unique_temp_dir("loong-bash-cwd-outside");
     fs::create_dir_all(&root).expect("create root");
     fs::create_dir_all(&outside).expect("create outside");
 
@@ -821,7 +809,7 @@ fn bash_exec_rejects_cwd_that_escapes_configured_file_root() {
     fs::remove_dir_all(&outside).ok();
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn bash_exec_times_out_when_timeout_ms_is_small() {
     let mut config = test_tool_runtime_config(std::env::temp_dir());
@@ -846,7 +834,7 @@ fn bash_exec_times_out_when_timeout_ms_is_small() {
     );
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn direct_exec_routes_script_mode_to_bash_exec() {
     assert_eq!(
@@ -861,12 +849,12 @@ fn direct_exec_routes_script_mode_to_bash_exec() {
     );
 }
 
-#[cfg(all(feature = "tool-shell", unix))]
+#[cfg(unix)]
 #[test]
 fn direct_exec_can_run_bash_through_the_collapsed_exec_surface() {
     use std::fs;
 
-    let root = unique_tool_temp_dir("loong-direct-exec-bash");
+    let root = unique_temp_dir("loong-direct-exec-bash");
     fs::create_dir_all(&root).expect("create fixture root");
 
     let mut config = test_tool_runtime_config(root.clone());

@@ -28,6 +28,7 @@ use routing::{
 };
 
 pub(crate) mod approval;
+#[cfg(feature = "tool-shell")]
 mod bash;
 #[cfg(feature = "tool-browser")]
 mod browser;

@@ -729,6 +729,7 @@ fn build_tool_catalog() -> ToolCatalog {
             concurrency_class: ToolConcurrencyClass::Unknown,
             provider_definition_builder: direct_edit_definition,
         },
+        #[cfg(feature = "tool-shell")]
         ToolDescriptor {
             name: "bash",
             provider_name: "bash",
@@ -2295,7 +2296,17 @@ fn tool_visibility_gate_enabled_for_runtime_policy(
         }
         ToolVisibilityGate::Delegate => config.delegate_enabled,
         ToolVisibilityGate::Browser => config.browser.enabled,
-        ToolVisibilityGate::BashRuntime => config.bash_exec.is_discoverable(),
+
+        ToolVisibilityGate::BashRuntime => {
+            #[cfg(feature = "tool-shell")]
+            {
+                config.bash_exec.is_discoverable()
+            }
+            #[cfg(not(feature = "tool-shell"))]
+            {
+                false
+            }
+        }
         ToolVisibilityGate::ExternalSkills => config.skills.enabled,
         ToolVisibilityGate::MemorySearchCorpus => {
             #[cfg(feature = "tool-file")]

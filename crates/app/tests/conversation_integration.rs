@@ -1,11 +1,15 @@
 #![cfg(test)]
 
 use std::collections::BTreeSet;
+#[cfg(feature = "tool-shell")]
 use std::path::PathBuf;
 
 use loong_app::conversation::turn_engine::TurnResult;
 use loong_app::test_support::{FakeProviderBuilder, TurnTestHarness};
-use loong_app::tools::runtime_config::{BashExecRuntimePolicy, ToolRuntimeConfig};
+#[cfg(feature = "tool-shell")]
+use loong_app::tools::runtime_config::BashExecRuntimePolicy;
+#[cfg(feature = "tool-shell")]
+use loong_app::tools::runtime_config::ToolRuntimeConfig;
 use loong_contracts::Capability;
 use serde_json::json;
 
@@ -131,6 +135,7 @@ async fn integ_file_write_then_read_round_trip() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tool-shell")]
 async fn integ_shell_exec_echo() {
     let harness = TurnTestHarness::with_tool_config(
         BTreeSet::from([
@@ -167,6 +172,7 @@ async fn integ_shell_exec_echo() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tool-shell")]
 async fn integ_shell_exec_blocked_command() {
     let harness = TurnTestHarness::with_tool_config(
         BTreeSet::from([
@@ -247,6 +253,7 @@ async fn integ_missing_capability_denies_tool() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[cfg(feature = "tool-shell")]
 async fn integ_audit_captures_tool_plane_invocation() {
     let harness = TurnTestHarness::with_tool_config(
         BTreeSet::from([
