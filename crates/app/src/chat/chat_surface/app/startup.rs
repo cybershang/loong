@@ -2149,4 +2149,3 @@ fn persist_startup_personalization(
     runtime.config = config;
     Ok(message)
 }
-

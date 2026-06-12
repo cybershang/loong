@@ -173,19 +173,23 @@ impl SessionRouter {
             crate::chat::CliSessionRequirement::AllowImplicitDefault => {
                 crate::chat::RouteOrigin::CreatedThisRun
             }
-            crate::chat::CliSessionRequirement::RequireExplicit => crate::chat::RouteOrigin::Existing,
+            crate::chat::CliSessionRequirement::RequireExplicit => {
+                crate::chat::RouteOrigin::Existing
+            }
         };
         let session_id = match session_hint {
             Some(session_id) => session_id.to_owned(),
-            None => crate::chat::initialize_cli_turn_runtime_with_loaded_config_and_kernel_ctx(
-                self.active_runtime().resolved_path.clone(),
-                self.active_runtime().config.clone(),
-                None,
-                &preserved_options,
-                self.active_runtime().runtime_kernel.cloned_kernel_context(),
-                session_requirement,
-            )?
-            .session_id,
+            None => {
+                crate::chat::initialize_cli_turn_runtime_with_loaded_config_and_kernel_ctx(
+                    self.active_runtime().resolved_path.clone(),
+                    self.active_runtime().config.clone(),
+                    None,
+                    &preserved_options,
+                    self.active_runtime().runtime_kernel.cloned_kernel_context(),
+                    session_requirement,
+                )?
+                .session_id
+            }
         };
         let route = crate::chat::rebuild_active_session_route(
             self.active_runtime().resolved_path.clone(),
@@ -213,10 +217,7 @@ impl SessionRouter {
     }
 }
 
-fn session_transition_success_message(
-    reason: SessionTransitionReason,
-    session_id: &str,
-) -> String {
+fn session_transition_success_message(reason: SessionTransitionReason, session_id: &str) -> String {
     match reason {
         SessionTransitionReason::UserRequestedNew => {
             format!("Started a new session: {session_id}")
