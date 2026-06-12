@@ -772,7 +772,10 @@ impl StartupOnboardingState {
         }
     }
 
-    pub(super) fn handle_personalization_key(&mut self, key: ChatKeyEvent) -> StartupOnboardingAction {
+    pub(super) fn handle_personalization_key(
+        &mut self,
+        key: ChatKeyEvent,
+    ) -> StartupOnboardingAction {
         let code = key.code;
         if code == KeyCode::Up {
             self.personalization_index = self.personalization_index.saturating_sub(1);

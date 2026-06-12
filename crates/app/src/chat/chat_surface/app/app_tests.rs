@@ -864,29 +864,33 @@ fn run_surface_command_resume_restores_history_as_chat_messages() {
         }
     }
     assert_eq!(harness.app.message_list.messages[2].role, "System");
-    assert!(!transcript_contains_internal_payload(&harness.app));
+    assert!(!harness.app.transcript_contains_internal_payload());
 }
 
-#[cfg(feature = "memory-sqlite")]
-fn transcript_contains_internal_payload(app: &App) -> bool {
-    app.message_list.messages.iter().any(|message| {
-        message.contents.iter().any(|content| match content {
-            crate::chat::chat_surface::message_list::MessageContent::Markdown(text) => {
-                text.contains("\"_loong_internal\":true")
-            }
-            crate::chat::chat_surface::message_list::MessageContent::RenderedLines(lines) => lines
-                .iter()
-                .any(|line| line.contains("\"_loong_internal\":true")),
-            crate::chat::chat_surface::message_list::MessageContent::Diff { .. }
-            | crate::chat::chat_surface::message_list::MessageContent::Image { .. }
-            | crate::chat::chat_surface::message_list::MessageContent::ToolCall { .. }
-            | crate::chat::chat_surface::message_list::MessageContent::Error { .. }
-            | crate::chat::chat_surface::message_list::MessageContent::Compaction { .. }
-            | crate::chat::chat_surface::message_list::MessageContent::StartupHeader { .. } => {
-                false
-            }
+impl App {
+    #[cfg(feature = "memory-sqlite")]
+    fn transcript_contains_internal_payload(&self) -> bool {
+        self.message_list.messages.iter().any(|message| {
+            message.contents.iter().any(|content| match content {
+                crate::chat::chat_surface::message_list::MessageContent::Markdown(text) => {
+                    text.contains("\"_loong_internal\":true")
+                }
+                crate::chat::chat_surface::message_list::MessageContent::RenderedLines(lines) => {
+                    lines
+                        .iter()
+                        .any(|line| line.contains("\"_loong_internal\":true"))
+                }
+                crate::chat::chat_surface::message_list::MessageContent::Diff { .. }
+                | crate::chat::chat_surface::message_list::MessageContent::Image { .. }
+                | crate::chat::chat_surface::message_list::MessageContent::ToolCall { .. }
+                | crate::chat::chat_surface::message_list::MessageContent::Error { .. }
+                | crate::chat::chat_surface::message_list::MessageContent::Compaction { .. }
+                | crate::chat::chat_surface::message_list::MessageContent::StartupHeader {
+                    ..
+                } => false,
+            })
         })
-    })
+    }
 }
 
 #[cfg(feature = "memory-sqlite")]
