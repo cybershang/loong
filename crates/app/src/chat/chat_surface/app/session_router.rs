@@ -217,7 +217,10 @@ impl SessionRouter {
     }
 }
 
-pub(super) fn session_transition_success_message(reason: SessionTransitionReason, session_id: &str) -> String {
+pub(super) fn session_transition_success_message(
+    reason: SessionTransitionReason,
+    session_id: &str,
+) -> String {
     match reason {
         SessionTransitionReason::UserRequestedNew => {
             format!("Started a new session: {session_id}")

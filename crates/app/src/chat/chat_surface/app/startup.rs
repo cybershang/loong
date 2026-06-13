@@ -52,7 +52,10 @@ pub(super) fn build_startup_provider_options(
         .collect()
 }
 
-pub(super) fn startup_current_provider_detail(runtime: &CliTurnRuntime, language: Language) -> String {
+pub(super) fn startup_current_provider_detail(
+    runtime: &CliTurnRuntime,
+    language: Language,
+) -> String {
     if let Some(env_name) = runtime.config.provider.resolved_auth_env_name() {
         return match language {
             Language::ZhCn => {
@@ -295,7 +298,10 @@ pub(super) fn startup_onboarding_footer_text_for_language(
     }
 }
 
-pub(super) fn startup_onboarding_subtitle(stage: StartupOnboardingStage, language: Language) -> &'static str {
+pub(super) fn startup_onboarding_subtitle(
+    stage: StartupOnboardingStage,
+    language: Language,
+) -> &'static str {
     match language {
         Language::ZhCn => match stage {
             StartupOnboardingStage::Language => "先选 TUI 语言，之后仍可继续细调 config.toml。",
@@ -396,7 +402,9 @@ pub(super) fn startup_onboarding_subtitle(stage: StartupOnboardingStage, languag
     }
 }
 
-pub(super) fn startup_onboarding_subtitle_for_state(state: &StartupOnboardingState) -> &'static str {
+pub(super) fn startup_onboarding_subtitle_for_state(
+    state: &StartupOnboardingState,
+) -> &'static str {
     if state.stage != StartupOnboardingStage::Finish {
         return startup_onboarding_subtitle(state.stage, state.current_language());
     }
@@ -669,7 +677,9 @@ pub(super) fn startup_finish_prompt(language: Language) -> &'static str {
     }
 }
 
-pub(super) fn startup_eye_animation_for_state(state: Option<&StartupOnboardingState>) -> StartupEyeAnimation {
+pub(super) fn startup_eye_animation_for_state(
+    state: Option<&StartupOnboardingState>,
+) -> StartupEyeAnimation {
     let Some(state) = state else {
         return StartupEyeAnimation::Ambient;
     };
@@ -1541,7 +1551,11 @@ pub(super) fn channel_enabled_in_config(config: &LoongConfig, channel_id: &str) 
     }
 }
 
-pub(super) fn startup_channel_label(channel_id: &str, fallback_label: &str, language: Language) -> String {
+pub(super) fn startup_channel_label(
+    channel_id: &str,
+    fallback_label: &str,
+    language: Language,
+) -> String {
     match language {
         Language::ZhCn => match channel_id {
             "feishu" => "飞书".to_owned(),

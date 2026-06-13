@@ -1048,7 +1048,10 @@ pub(super) fn resolve_import_path(cwd: &Path, input: &str) -> PathBuf {
     }
 }
 
-pub(super) fn resolve_cwd_change_path(runtime: &CliTurnRuntime, input: &str) -> Result<PathBuf, String> {
+pub(super) fn resolve_cwd_change_path(
+    runtime: &CliTurnRuntime,
+    input: &str,
+) -> Result<PathBuf, String> {
     let trimmed = input.trim().trim_matches('"').trim_matches('\'');
     if trimmed.is_empty() {
         return Err("Usage: /cwd <path>".to_owned());
@@ -1112,7 +1115,11 @@ pub(super) fn render_cwd_change_command_lines_with_width(
     crate::chat::render_cli_chat_message_spec_with_width(&message_spec, width)
 }
 
-pub(super) fn import_context_into_composer(app: &mut App, cwd: &Path, args: &str) -> Result<PathBuf, String> {
+pub(super) fn import_context_into_composer(
+    app: &mut App,
+    cwd: &Path,
+    args: &str,
+) -> Result<PathBuf, String> {
     let path = resolve_import_path(cwd, args);
     let content = fs::read_to_string(path.as_path())
         .map_err(|error| format!("failed to read {}: {error}", path.display()))?;
@@ -1233,7 +1240,11 @@ pub(super) fn render_prompt_staging_lines_with_width(
     crate::chat::render_cli_chat_message_spec_with_width(&message_spec, width)
 }
 
-pub(super) fn render_title_command_lines_with_width(command: &str, args: &str, width: usize) -> Vec<String> {
+pub(super) fn render_title_command_lines_with_width(
+    command: &str,
+    args: &str,
+    width: usize,
+) -> Vec<String> {
     let lines = if args.trim().is_empty() {
         vec![format!("Usage: {command} <title>")]
     } else {
