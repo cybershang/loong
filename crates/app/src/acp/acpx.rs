@@ -1260,7 +1260,7 @@ mod tests {
         write_executable_script_atomically(&script_path, "#!/bin/sh\necho 'acpx 0.1.16'\n")
             .expect("write fake acpx script");
 
-        let mut env = ScopedEnv::new();
+        let mut env = crate::test_utils::ScopedEnv::new();
         let original_path = std::env::var_os("PATH").unwrap_or_default();
         let original_entries = std::env::split_paths(&original_path);
         let mut path_entries = vec![bin_dir.clone()];
